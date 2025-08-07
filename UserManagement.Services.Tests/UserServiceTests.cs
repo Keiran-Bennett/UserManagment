@@ -40,6 +40,62 @@ public class UserServiceTests
         return users;
     }
 
+    [Fact]
+    public void GetActiveUsers_WhenContextReturnUsers_MustBeOnlyActiveUsers()
+    {
+        var service = CreateService();
+        var users = SetupActiveUsersDataModels();
+
+        var activeUsers = service.GetActiveUsers();
+
+        activeUsers.Count().Should().Be(1);
+    }
+
+    [Fact]
+    public void GetActiveUsers_WhenContextReturnUsers_MustBeOnlyInActiveUsers()
+    {
+        var service = CreateService();
+        var users = SetupActiveUsersDataModels();
+
+        var activeUsers = service.GetInActiveUsers();
+
+        activeUsers.Count().Should().Be(2);
+    }
+
+    private IQueryable<User> SetupActiveUsersDataModels()
+    {
+        var users = new[]
+        {
+            new User
+            {
+                Forename = "test 1",
+                Surname = "test 1",
+                Email = "test@email.com",
+                IsActive = false,
+            },
+              new User
+            {
+                Forename = "test 2",
+                Surname = "test 2",
+                Email = "test2@email.com",
+                IsActive = true,
+            }
+              ,  new User
+            {
+                Forename = "test 1",
+                Surname = "test 1",
+                Email = "test2@email.com",
+                IsActive = false,
+            }
+        }.AsQueryable();
+
+        _dataContext
+            .Setup(s => s.GetAll<User>())
+            .Returns(users);
+
+        return users;
+    }
+
     private readonly Mock<IDataContext> _dataContext = new();
     private UserService CreateService() => new(_dataContext.Object);
 }

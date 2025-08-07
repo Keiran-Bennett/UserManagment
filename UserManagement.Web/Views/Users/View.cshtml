@@ -1,0 +1,23 @@
+﻿@using UserManagement.Web.Models.Users
+@model UserViewModel
+
+<h2>User Details</h2>
+@if(Model.IsSuccess)
+{
+<p><strong>Forename:</strong> @Model.User.Forename</p>
+<p><strong>Surname:</strong> @Model.User.Surname</p>
+<p><strong>Email:</strong> @Model.User.Email</p>
+<p><strong>Date of Birth:</strong> @Model.User.DateOfBirth</p>
+<p><strong>Is Active:</strong> @(Model.User.IsActive ? "Yes" : "No")</p>
+
+<a asp-action="Edit" asp-route-id="@Model.User.Id">Edit</a>
+    <a asp-action="Delete" asp-route-id="@Model.User.Id">Delete</a>
+}
+else
+{
+    <p>There was an error retrieving the user</p>
+}
+
+
+@{
+}

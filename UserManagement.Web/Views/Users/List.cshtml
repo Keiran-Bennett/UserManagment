@@ -1,4 +1,5 @@
-﻿@model UserManagement.Web.Models.Users.UserListViewModel
+﻿@using UserManagement.Services
+@model UserManagement.Web.Models.Users.UserListViewModel
 
 <h2>User List</h2>
 
@@ -10,28 +11,32 @@
                 <th>Forename</th>
                 <th>Surname</th>
                 <th>Email</th>
+                <th>Date of Birth</th>
                 <th>Account Active</th>
                 <th style="width: 1px;"></th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var item in Model.Items)
+            @foreach (var user in Model.Users)
             {
                 <tr>
                     <td>
-                        @item.Id
+                        @user.Id
                     </td>
                     <td>
-                        @item.Forename
+                        @user.Forename
                     </td>
                     <td>
-                        @item.Surname
+                        @user.Surname
                     </td>
                     <td>
-                        @item.Email
+                        @user.Email
                     </td>
                     <td>
-                        @(item.IsActive ? "Yes" : "No")
+                        @user.DateOfBirth
+                    </td>
+                    <td>
+                        @(user.IsActive ? "Yes" : "No")
                     </td>
                     <td>
                         <div class="dropdown">
@@ -39,7 +44,7 @@
                                 Actions
                             </button>
                             <ul class="dropdown-menu" aria-labelledby="btnToggleActions">
-                                <li><a class="dropdown-item" href="#">View</a></li>
+                                <li><a class="dropdown-item" asp-controller="Users" asp-action="View" asp-route-id="@user.Id">View</a></li>
                                 <li><a class="dropdown-item" href="#">Edit</a></li>
                                 <li><a class="dropdown-item" href="#">Delete</a></li>
                             </ul>
@@ -53,9 +58,9 @@
 
 <div>
     <div class="btn-group" role="group">
-        <a asp-controller="Users" asp-action="List" class="btn btn-default">Show All</a>
-        <a href="#" class="btn btn-default">Active Only</a>
-        <a href="#" class="btn btn-default">Non Active</a>
+        <a asp-controller="Users" asp-action="List" asp-route-userType="@Convert.ToInt32(UserRetrievalType.Default)" class="btn btn-default">Show All</a>
+        <a asp-controller="Users" asp-action="List" asp-route-userType="@Convert.ToInt32(UserRetrievalType.ActiveUsers)" class="btn btn-default">Active Only</a>
+        <a asp-controller="Users" asp-action="List" asp-route-userType="@Convert.ToInt32(UserRetrievalType.InActiveUsers)" class="btn btn-default">Non Active</a>
     </div>
 
     <a href="#" class="btn btn-primary float-end">
