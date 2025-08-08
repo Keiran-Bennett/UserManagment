@@ -1,6 +1,8 @@
 using System.Linq;
+using System.Threading.Tasks;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Implementations;
+using UserManagement.Services.Domain.Interfaces;
 
 namespace UserManagement.Data.Tests;
 
@@ -41,23 +43,23 @@ public class UserServiceTests
     }
 
     [Fact]
-    public void GetActiveUsers_WhenContextReturnUsers_MustBeOnlyActiveUsers()
+    public async Task GetActiveUsers_WhenContextReturnUsers_MustBeOnlyActiveUsers()
     {
         var service = CreateService();
         var users = SetupActiveUsersDataModels();
 
-        var activeUsers = service.GetActiveUsers();
+        var activeUsers = await service.GetActiveUsers();
 
         activeUsers.Count().Should().Be(1);
     }
 
     [Fact]
-    public void GetActiveUsers_WhenContextReturnUsers_MustBeOnlyInActiveUsers()
+    public async Task GetActiveUsers_WhenContextReturnUsers_MustBeOnlyInActiveUsers()
     {
         var service = CreateService();
         var users = SetupActiveUsersDataModels();
 
-        var activeUsers = service.GetInActiveUsers();
+        var activeUsers = await service.GetInActiveUsers();
 
         activeUsers.Count().Should().Be(2);
     }
@@ -68,6 +70,7 @@ public class UserServiceTests
         {
             new User
             {
+                Id = 1,
                 Forename = "test 1",
                 Surname = "test 1",
                 Email = "test@email.com",
@@ -75,6 +78,7 @@ public class UserServiceTests
             },
               new User
             {
+                  Id = 2,
                 Forename = "test 2",
                 Surname = "test 2",
                 Email = "test2@email.com",
@@ -82,6 +86,7 @@ public class UserServiceTests
             }
               ,  new User
             {
+                  Id = 3,
                 Forename = "test 1",
                 Surname = "test 1",
                 Email = "test2@email.com",
@@ -97,5 +102,6 @@ public class UserServiceTests
     }
 
     private readonly Mock<IDataContext> _dataContext = new();
-    private UserService CreateService() => new(_dataContext.Object);
+    private readonly Mock<ILogService> _loggerService = new();
+    private UserService CreateService() => new(_dataContext.Object, _loggerService.Object);
 }
