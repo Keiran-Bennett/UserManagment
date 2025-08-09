@@ -1,10 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
-using System.Linq.Expressions;
-using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Query;
 using UserManagement.Data;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Interfaces;
@@ -57,9 +54,20 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<User?> GetUser(long userID)
+    public async Task<User> GetUser(int userID)
     {
-
+        try
+        {
+            return await GetUserWithLogs(userID) ?? throw new System.Exception("User cannot be found");
+        }
+        catch
+        {
+            throw;
+        }        
+    }
+    
+    private async Task<User?> GetUserWithLogs(long userID)
+    {
         var user = await _dataAccess.Get<User>(u => u.Id == userID);
         if (user != null)
         {
@@ -69,6 +77,7 @@ public class UserService : IUserService
 
         return user;
     }
+
     public async Task<bool> EditUser(User user)
     {
         await _dataAccess.Update(user);

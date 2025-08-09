@@ -29,6 +29,8 @@ Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "DatabaseDeploy", "DatabaseD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserManagment.Blazor", "UserManagment.Blazor\UserManagment.Blazor.csproj", "{D39A3558-1096-4B48-8997-8A96ACE07456}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserManagment.TestAsyncHelper", "TestAsyncHelper\UserManagment.TestAsyncHelper.csproj", "{6A684C35-ED73-4879-82B4-17D659232C1A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -69,6 +71,10 @@ Global
 		{D39A3558-1096-4B48-8997-8A96ACE07456}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D39A3558-1096-4B48-8997-8A96ACE07456}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D39A3558-1096-4B48-8997-8A96ACE07456}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6A684C35-ED73-4879-82B4-17D659232C1A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6A684C35-ED73-4879-82B4-17D659232C1A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6A684C35-ED73-4879-82B4-17D659232C1A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6A684C35-ED73-4879-82B4-17D659232C1A}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
@@ -77,6 +83,7 @@ Global
 		{F15707C9-86D2-4D30-BD1B-672487F7D3AC} = {C9849C01-AD0F-437C-B6E8-5B627335F8EE}
 		{1EDAC0F0-A080-45D5-9D56-9B2070AA7404} = {C9849C01-AD0F-437C-B6E8-5B627335F8EE}
 		{C0F78DDD-C753-432C-8E1B-F88A2DB459FD} = {C9849C01-AD0F-437C-B6E8-5B627335F8EE}
+		{6A684C35-ED73-4879-82B4-17D659232C1A} = {C9849C01-AD0F-437C-B6E8-5B627335F8EE}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {46E0200E-E65A-469F-9BC8-971E5875A972}

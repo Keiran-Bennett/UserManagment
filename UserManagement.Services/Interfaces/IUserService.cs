@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel.Design;
-using System.Net.Http.Headers;
 using System.Threading.Tasks;
 using UserManagement.Models;
 
@@ -11,7 +9,7 @@ public interface IUserService
 {
     Task<bool> AddUser(User user);
     Task<bool> EditUser(User user);
-    Task<User?> GetUser(long userID);
+    Task<User> GetUser(int userID);
     Task<IEnumerable<User>> GetActiveUsers();
     Task<IEnumerable<User>> GetInActiveUsers();
     Task<IEnumerable<User>> GetAll();

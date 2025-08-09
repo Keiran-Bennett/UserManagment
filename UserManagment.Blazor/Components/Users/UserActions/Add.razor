@@ -1,15 +1,11 @@
-﻿@page "/user/add"
+﻿@page "/adduser"
 @using UserManagement.Web.Models.Users
 
 <h2>Add User</h2>
 
-@if (IsLoading)
+@if (Model?.IsSuccess == true)
 {
-    <p><em>Loading...</em></p>
-}
-else if (Model?.IsSuccess == true)
-{
-    <EditForm Model="Model.User" OnValidSubmit="HandleValidSubmit">
+    <EditForm Model="Model.User" OnValidSubmit="HandleValidSubmit" formname="AddUserForm">
         <DataAnnotationsValidator />
         <ValidationSummary />
 
@@ -61,45 +57,23 @@ else
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
 
-    protected UserAddViewModel Model { get; set; } = new();
-    private bool IsLoading = true;
-
-    protected override async Task OnInitializedAsync()
-    {
-        IsLoading = true;
-        try
-        {
-            Model = await API.GetJsonAsync<UserAddViewModel>("users/add");
-        }
-        catch
-        {
-            Model = null;
-        }
-        finally
-        {
-            IsLoading = false;
-        }
-    }
+    protected UserAddViewModel Model { get; set; } = new() { IsSuccess = true};
 
     private async Task HandleValidSubmit()
     {
         if (Model == null)
             return;
 
-        var response = await API.PostJsonAsync<("users/confirmadd", Model.User);
-
-        if (response.IsSuccessStatusCode)
-        {
-            NavigationManager.NavigateTo("/userslist");
-        }
+        var response = await API.PostJsonAsync<UserDTO,UserAddViewModel>("users/confirmadd", Model.User) ?? new();
+        if (response.IsSuccess)
+            NavigationManager.NavigateTo("/userlist");
         else
-        {
-            // Handle error, e.g., show message
-        }
+            response.IsSuccess = false;
+        
     }
 
     private void Cancel()
     {
-        NavigationManager.NavigateTo("/userslist");
+        NavigationManager.NavigateTo("/userlist");
     }
 }

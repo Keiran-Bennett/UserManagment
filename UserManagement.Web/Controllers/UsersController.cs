@@ -1,6 +1,5 @@
 ﻿using System.Linq;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components.Forms;
 using UserManagement.Models;
 using UserManagement.Services;
 using UserManagement.Services.Domain.Interfaces;
@@ -25,8 +24,6 @@ public class UsersController : Controller
         return ReturnRazorOrBlazorResponse(model);
     }
 
-
-
     private async Task<IEnumerable<Models.User>> GetUsers(int userType)
     {
         UserRetrievalType userRetrievalType = (UserRetrievalType)userType;
@@ -42,19 +39,17 @@ public class UsersController : Controller
 
     private static UserListViewModel MapUsersToViewModel(IEnumerable<Models.User> users)
     {
-        var items = users.Select(u => (UserListItemViewModel)u);
-        return new UserListViewModel { Users = items.ToList()};
+        var items = users.Select(u => (UserDTO)u);
+        return new UserListViewModel { Users = items.ToList() };
     }
 
     [HttpGet("View/{id:int}")]
-    public async Task<IActionResult> View(long id)
+    public async Task<IActionResult> View(int id)
     {
         var user = await _userService.GetUser(id);
         UserViewModel viewModel = CreateViewModelFromUser(user);
         return ReturnRazorOrBlazorResponse(viewModel);
     }
-
-
 
     private static UserViewModel CreateViewModelFromUser(User? user)
     {
@@ -63,20 +58,18 @@ public class UsersController : Controller
         else
             return new UserViewModel
             {
-                User = (UserListItemViewModel)user,
+                User = (UserDTO)user,
                 IsSuccess = true
             };
     }
 
     [HttpGet("delete/{id:int}")]
-    public async Task<IActionResult> Delete(long id)
+    public async Task<IActionResult> Delete(int id)
     {
         var user = await _userService.GetUser(id);
         UserDeleteViewModel viewModel = CreateDeleteViewModelFromUser(user);
         return ReturnRazorOrBlazorResponse(viewModel);
     }
-
-
 
     private static UserDeleteViewModel CreateDeleteViewModelFromUser(User? user)
     {
@@ -85,7 +78,7 @@ public class UsersController : Controller
         else
             return new UserDeleteViewModel
             {
-                User = (UserListItemViewModel)user,
+                User = (UserDTO)user,
                 IsSuccess = true
             };
     }
@@ -100,7 +93,7 @@ public class UsersController : Controller
             return IsBlazor() ? Ok(new UserDeleteViewModel { IsSuccess = true }) : RedirectToAction("List");
     }
 
- 
+
     [HttpGet("edit/{id:int}")]
     public async Task<IActionResult> Edit(int id)
     {
@@ -116,7 +109,7 @@ public class UsersController : Controller
         else
             return new UserEditViewModel
             {
-                User = (UserListItemViewModel)user,
+                User = (UserDTO)user,
                 IsSuccess = true
             };
     }
@@ -162,10 +155,5 @@ public class UsersController : Controller
             return View(model);
     }
 
-    private bool IsBlazor()
-    {
-        var acceptHeader = Request.Headers["Accept"].ToString();
-        return acceptHeader.Contains("application/json");
-    }
-
+    private bool IsBlazor() => Request.IsBlazorRequest();
 }

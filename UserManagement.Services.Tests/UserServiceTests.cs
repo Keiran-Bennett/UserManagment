@@ -1,5 +1,7 @@
+using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
 using System.Threading.Tasks;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Implementations;
@@ -18,7 +20,6 @@ public class UserServiceTests
         Mock<IDataContext> dataContextWithErrors = new();
 
         dataContextWithErrors.Setup(s => s.GetAll<User>()).Throws(new System.Exception("test exception"));
-
         return new(dataContextWithErrors.Object, _loggerService.Object);
     }
 
@@ -101,7 +102,6 @@ public class UserServiceTests
         result.Should().BeEquivalentTo(new List<User> { });
     }
 
-
     private Mock<IDataContext> SetupActiveUsersDataModels()
     {
         Mock<IDataContext> dataContext = new();
@@ -140,4 +140,44 @@ public class UserServiceTests
                 IsActive = false,
             }
             }.AsQueryable();
+
+
+
+    [Fact]
+    public async Task GetUser_Error_RethrowsException()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        _dataContext.Setup(s => s.Get<User>(It.IsAny<Expression<Func<User, bool>>>())).Throws(new System.Exception("test exception"));
+        var service = CreateServiceWithMockedErrors();
+
+        // Act: Invokes the method under test with the arranged parameters.
+        Func<Task<User>> result = async () => await service.GetUser(1);
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        await result.Should().ThrowAsync<Exception>();
+    }
+
+    [Fact]
+    public async Task GetUser_Success_ReturnsUser()
+    {
+        // Arrange
+        _dataContext
+        .Setup(s => s.Get<User>(It.Is<Expression<Func<User, bool>>>(u => u.Compile()(new User { Id = 1 }))))
+        .ReturnsAsync(new User { Forename = "bob", Surname = "Jones" });
+
+
+        var service = new UserService(_dataContext.Object, _loggerService.Object);
+
+        // Act
+        var result = await service.GetUser(1);
+
+        // Assert
+        result.Should().BeEquivalentTo(new User { Forename = "bob", Surname = "Jones" });
+    }
+
+
+
+
+
+
 }

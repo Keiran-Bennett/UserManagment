@@ -21,6 +21,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\TestAsyncHelper\UserManagment.TestAsyncHelper.csproj" />
     <ProjectReference Include="..\UserManagement.Web\UserManagement.Web.csproj" />
   </ItemGroup>
 

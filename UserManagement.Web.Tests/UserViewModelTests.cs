@@ -11,7 +11,7 @@ public class UserViewModelTests
     {
         User user = CreateUser();
 
-        UserListItemViewModel userViewModel = (UserListItemViewModel)user;
+        UserDTO userViewModel = (UserDTO)user;
 
         userViewModel.Id.Should().Be(user.Id);
         userViewModel.Forename.Should().Be(user.Forename);

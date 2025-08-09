@@ -4,7 +4,7 @@
 
 <h2>User Details</h2>
 
-@if (Model?.IsSuccess == true)
+@if (Model.IsSuccess == true)
 {
 <p><strong>Forename:</strong> @Model.User.Forename</p>
 <p><strong>Surname:</strong> @Model.User.Surname</p>
@@ -29,7 +29,7 @@ else
     [Parameter]
     public int UserId { get; set; }
 
-    protected UserViewModel Model { get; set; } = default!;
+    protected UserViewModel Model { get; set; } = new();
 
     protected override async Task OnParametersSetAsync()
     {
