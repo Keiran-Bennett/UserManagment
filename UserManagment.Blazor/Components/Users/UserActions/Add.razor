@@ -1,0 +1,105 @@
+﻿@page "/user/add"
+@using UserManagement.Web.Models.Users
+
+<h2>Add User</h2>
+
+@if (IsLoading)
+{
+    <p><em>Loading...</em></p>
+}
+else if (Model?.IsSuccess == true)
+{
+    <EditForm Model="Model.User" OnValidSubmit="HandleValidSubmit">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <input type="hidden" @bind="Model.User.Id" />
+
+        <div class="form-group">
+            <label for="forename">Forename</label>
+            <InputText id="forename" class="form-control" @bind-Value="Model.User.Forename" />
+            <ValidationMessage For="@(() => Model.User.Forename)" />
+        </div>
+
+        <div class="form-group">
+            <label for="surname">Surname</label>
+            <InputText id="surname" class="form-control" @bind-Value="Model.User.Surname" />
+            <ValidationMessage For="@(() => Model.User.Surname)" />
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <InputText id="email" type="email" class="form-control" @bind-Value="Model.User.Email" />
+            <ValidationMessage For="@(() => Model.User.Email)" />
+        </div>
+
+        <div class="form-group">
+            <label for="dob">Date of Birth</label>
+            <InputDate id="dob" class="form-control" @bind-Value="Model.User.DateOfBirth" />
+            <ValidationMessage For="@(() => Model.User.DateOfBirth)" />
+        </div>
+
+        <div class="form-group form-check">
+            <InputCheckbox id="isActive" class="form-check-input" @bind-Value="Model.User.IsActive" />
+            <label class="form-check-label" for="isActive">Is Active</label>
+            <ValidationMessage For="@(() => Model.User.IsActive)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </EditForm>
+}
+else
+{
+    <p>There was an error retrieving the user</p>
+}
+
+@code {
+    [Inject]
+    public APIService.IApiService API { get; set; } = default!;
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
+    protected UserAddViewModel Model { get; set; } = new();
+    private bool IsLoading = true;
+
+    protected override async Task OnInitializedAsync()
+    {
+        IsLoading = true;
+        try
+        {
+            Model = await API.GetJsonAsync<UserAddViewModel>("users/add");
+        }
+        catch
+        {
+            Model = null;
+        }
+        finally
+        {
+            IsLoading = false;
+        }
+    }
+
+    private async Task HandleValidSubmit()
+    {
+        if (Model == null)
+            return;
+
+        var response = await API.PostJsonAsync<("users/confirmadd", Model.User);
+
+        if (response.IsSuccessStatusCode)
+        {
+            NavigationManager.NavigateTo("/userslist");
+        }
+        else
+        {
+            // Handle error, e.g., show message
+        }
+    }
+
+    private void Cancel()
+    {
+        NavigationManager.NavigateTo("/userslist");
+    }
+}

@@ -23,10 +23,12 @@
     <tbody>
         @foreach(var user in Model.Users)
         {
-            <UserRow User="user" ViewUserCallBack="ViewUser" />
+            <UserRow User="user" ViewUserCallBack="ViewUser" DeleteUserCallBack="GoToDeleteUser" />
         }
     </tbody>
 </table>
+
+<button @onclick="() => ViewUser(User.Id)" type="button" class="btn btn-primary">View</button>
 
 <UserListFilterOptions OptionChanged="ChangeFilterOption" ></UserListFilterOptions>
 
@@ -43,18 +45,16 @@
     protected async Task ChangeFilterOption(UserRetrievalType type)
     {
         string uri = $"{EndpointName}?userType={(int)type}";
-        UserListViewModel? result = await API.GetJsonAsync<UserListViewModel>(uri);
-        Model = result == null ? new UserListViewModel() : result;
+        Model = await API.GetJsonAsync<UserListViewModel>(uri) ?? new();
     }
 
 
     protected override async Task OnParametersSetAsync()
     {
-        UserListViewModel? result = await API.GetJsonAsync<UserListViewModel>(EndpointName);
-        Model = result == null ? new UserListViewModel() : result;
+        Model = await API.GetJsonAsync<UserListViewModel>(EndpointName) ?? new();
     }
 
     protected void ViewUser(int ID) => NavigationManager.NavigateTo($"/userdetails/{ID}");
-
+    protected void GoToDeleteUser(int ID) => NavigationManager.NavigateTo($"/deleteuser/{ID}");
 
 }

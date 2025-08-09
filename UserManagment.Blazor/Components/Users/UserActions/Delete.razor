@@ -1,0 +1,54 @@
+﻿@page "/deleteuser/{UserId:int}"
+@using UserManagement.Web.Models.Users
+@rendermode InteractiveServer
+
+
+<h2>Delete User</h2>
+
+@if (Model.IsSuccess == true)
+{
+    <p>Are you sure you want to delete this user with the following details?</p>
+
+    <p><strong>Forename:</strong> @Model.User.Forename</p>
+    <p><strong>Surname:</strong> @Model.User.Surname</p>
+    <p><strong>Email:</strong> @Model.User.Email</p>
+    <p><strong>Date of Birth:</strong> @Model.User.DateOfBirth.ToString("dd-MM-yyyy")</p>
+    <p><strong>Is Active:</strong> @(Model.User.IsActive ? "Yes" : "No")</p>
+
+    <button class="btn btn-danger me-2" @onclick="() => DeleteUser()" >Delete User</button>
+    <button class="btn btn-secondary" @onclick="() => Cancel()">Cancel</button>
+}
+else
+{
+    <p>There was an error deleting the user, please try again later</p>
+}
+
+@code {
+    [Inject]
+    public APIService.IApiService API { get; set; } = default!;
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
+    [Parameter]
+    public int UserId { get; set; }
+    protected UserDeleteViewModel Model { get; set; } = new();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        Model = await API.GetJsonAsync<UserDeleteViewModel>($"users/delete/{UserId}") ?? new();
+    }
+
+    private async Task DeleteUser()
+    {
+        UserDeleteViewModel response = await API.PostJsonAsync<object?, UserDeleteViewModel>($"users/confirmdelete/{UserId}",(object?) null) ?? new();
+        if (response.IsSuccess)
+            GoBack();
+        else
+            Model.IsSuccess = false;
+    }
+
+    protected void Cancel() => GoBack();
+
+    protected void GoBack() => NavigationManager.NavigateTo("/userlist");
+}

@@ -14,7 +14,7 @@
 
     <form asp-controller="Users" asp-action="ConfirmDelete" method="post">
         <input type="hidden" name="id" value="@Model.User.Id" />
-        <button type="submit" class="btn btn-danger">Delete User</button>
+        <button type="submit" class="btn btn-danger me-2">Delete User</button>
         <a asp-controller="Users" asp-action="List" class="btn btn-secondary">Cancel</a>
 
     </form>
@@ -24,6 +24,3 @@ else
     <p>There was an error retrieving the user</p>
 }
 
-
-@{
-}

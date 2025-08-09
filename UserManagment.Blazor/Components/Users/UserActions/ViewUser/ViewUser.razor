@@ -14,7 +14,7 @@
 
 <UserLogsTable Logs="Model.User.Logs" />
 
-<a href="@($"edit/{Model.User.Id}")" class="btn btn-primary">Edit</a>
+<a href="@($"edit/{Model.User.Id}")" class="btn btn-primary me-2">Edit</a>
 <a href="@($"delete/{Model.User.Id}")" class="btn btn-danger">Delete</a>
 }
 else
@@ -33,8 +33,6 @@ else
 
     protected override async Task OnParametersSetAsync()
     {
-        var result = await API.GetJsonAsync<UserViewModel>($"users/View/{UserId}");
-            Model = result is null ? new() : result;
-
+        Model = await API.GetJsonAsync<UserViewModel>($"users/View/{UserId}") ?? new();
     }
 }

@@ -54,14 +54,7 @@ public class UsersController : Controller
         return ReturnRazorOrBlazorResponse(viewModel);
     }
 
-    private IActionResult ReturnRazorOrBlazorResponse<T>(T model)
-    {
-        var acceptHeader = Request.Headers["Accept"].ToString();
-        if (acceptHeader.Contains("application/json"))
-            return Ok(model);
-        else
-            return View(model);
-    }
+
 
     private static UserViewModel CreateViewModelFromUser(User? user)
     {
@@ -76,12 +69,14 @@ public class UsersController : Controller
     }
 
     [HttpGet("delete/{id:int}")]
-    public async Task<ViewResult> Delete(long id)
+    public async Task<IActionResult> Delete(long id)
     {
         var user = await _userService.GetUser(id);
         UserDeleteViewModel viewModel = CreateDeleteViewModelFromUser(user);
-        return View(viewModel);
+        return ReturnRazorOrBlazorResponse(viewModel);
     }
+
+
 
     private static UserDeleteViewModel CreateDeleteViewModelFromUser(User? user)
     {
@@ -95,16 +90,17 @@ public class UsersController : Controller
             };
     }
 
-    [HttpPost("confirmdelete")]
-    public async Task<IActionResult> ConfirmDelete(long id)
+    [HttpPost("confirmdelete/{id:int}")]
+    public async Task<IActionResult> ConfirmDelete(int id)
     {
         bool IsSuccess = await _userService.DeleteUser(id);
         if (!IsSuccess)
-            return View(new UserDeleteViewModel { IsSuccess = false });
-
-        return RedirectToAction("List");
+            return ReturnRazorOrBlazorResponse(new UserDeleteViewModel { IsSuccess = false });
+        else
+            return IsBlazor() ? Ok(new UserDeleteViewModel { IsSuccess = true }) : RedirectToAction("List");
     }
 
+ 
     [HttpGet("edit/{id:int}")]
     public async Task<IActionResult> Edit(int id)
     {
@@ -147,13 +143,29 @@ public class UsersController : Controller
     [HttpPost("confirmadd")]
     public async Task<IActionResult> ConfirmAdd(UserEditViewModel model)
     {
+        model.IsSuccess = false;
         if (!ModelState.IsValid)
-            return View(model);
+            return ReturnRazorOrBlazorResponse(model);
 
         bool result = await _userService.AddUser((User)model.User);
         if (!result)
-            return View(model);
+            return ReturnRazorOrBlazorResponse(model);
 
-        return RedirectToAction("List");
+        return IsBlazor() ? Ok(new UserDeleteViewModel { IsSuccess = true }) : RedirectToAction("List");
     }
+
+    private IActionResult ReturnRazorOrBlazorResponse<T>(T model)
+    {
+        if (IsBlazor())
+            return Ok(model);
+        else
+            return View(model);
+    }
+
+    private bool IsBlazor()
+    {
+        var acceptHeader = Request.Headers["Accept"].ToString();
+        return acceptHeader.Contains("application/json");
+    }
+
 }
