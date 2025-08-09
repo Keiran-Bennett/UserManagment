@@ -1,7 +1,10 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Query;
 using UserManagement.Data;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Interfaces;
@@ -17,9 +20,43 @@ public class UserService : IUserService
         _dataAccess = dataAccess;
         _logService = logService;
     }
-    public async Task<IEnumerable<User>> GetAll() => await _dataAccess.GetAll<User>().ToListAsync();
-    public async Task<IEnumerable<User>> GetActiveUsers() => await _dataAccess.GetAll<User>().Where(u => u.IsActive).ToListAsync();
-    public async Task<IEnumerable<User>> GetInActiveUsers() => await _dataAccess.GetAll<User>().Where(u => !u.IsActive).ToListAsync();
+    public async Task<IEnumerable<User>> GetAll()
+    {
+        try
+        {
+            return await _dataAccess.GetAll<User>().ToListAsync();
+        }
+        catch
+        {
+            return new List<User>();
+        }
+    }
+
+
+    public async Task<IEnumerable<User>> GetActiveUsers()
+    {
+        try
+        {
+            return await _dataAccess.GetAll<User>().Where(u => u.IsActive).ToListAsync();
+        }
+        catch
+        {
+            return new List<User>();
+        }
+    }
+
+    public async Task<IEnumerable<User>> GetInActiveUsers()
+    {
+        try
+        {
+            return await _dataAccess.GetAll<User>().Where(u => !u.IsActive).ToListAsync();
+        }
+        catch
+        {
+            return new List<User>();
+        }
+    }
+
     public async Task<User?> GetUser(long userID)
     {
 
@@ -65,32 +102,3 @@ public class UserService : IUserService
     private async Task LogAction(AddLogRequest logDeleteRequest) => await _logService.AddLog(logDeleteRequest);
 }
 
-public class LogService : ILogService
-{
-    private readonly IDataContext _dataAccess;
-    public LogService(IDataContext dataAccess) => _dataAccess = dataAccess;
-
-    public async Task<bool> AddLog(AddLogRequest request)
-    {
-        Log log = CreateLog(request);
-        await _dataAccess.Create(log);
-        return true;
-    }
-
-    private static Log CreateLog(AddLogRequest request) => new Log { DateofAction = request.DateOfAction, UserID = (int)request.UserID, Details = request.Details };
-
-    public async Task<IEnumerable<Log>> GetAllLogs()
-    {
-        return await _dataAccess
-            .GetAll<Log>()
-            .ToListAsync();
-    }
-
-    public async Task<IEnumerable<Log>> GetAllLogsPerUser(int userID)
-    {
-        return await _dataAccess
-            .GetAll<Log>()
-            .Where(u => u.UserID == userID)
-            .ToListAsync();
-    }
-}

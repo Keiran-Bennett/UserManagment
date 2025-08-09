@@ -17,13 +17,15 @@ public class UsersController : Controller
         _userService = userService;
     }
 
-    [HttpGet]
-    public async Task<ViewResult> List(int userType)
+    [HttpGet("list")]
+    public async Task<IActionResult> List(int userType)
     {
         var users = await GetUsers(userType);
         UserListViewModel model = MapUsersToViewModel(users);
-        return View(model);
+        return ReturnRazorOrBlazorResponse(model);
     }
+
+
 
     private async Task<IEnumerable<Models.User>> GetUsers(int userType)
     {
@@ -44,12 +46,21 @@ public class UsersController : Controller
         return new UserListViewModel { Users = items.ToList()};
     }
 
-    [HttpGet("{id:int}")]
-    public async Task<ViewResult> View(long id)
+    [HttpGet("View/{id:int}")]
+    public async Task<IActionResult> View(long id)
     {
         var user = await _userService.GetUser(id);
         UserViewModel viewModel = CreateViewModelFromUser(user);
-        return View(viewModel);
+        return ReturnRazorOrBlazorResponse(viewModel);
+    }
+
+    private IActionResult ReturnRazorOrBlazorResponse<T>(T model)
+    {
+        var acceptHeader = Request.Headers["Accept"].ToString();
+        if (acceptHeader.Contains("application/json"))
+            return Ok(model);
+        else
+            return View(model);
     }
 
     private static UserViewModel CreateViewModelFromUser(User? user)

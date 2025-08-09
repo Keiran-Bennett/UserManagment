@@ -1,0 +1,60 @@
+﻿@page "/userlist"
+@using UserManagement.Services
+@using UserManagement.Web.Models.Users
+@rendermode InteractiveServer
+
+
+<PageTitle>User List</PageTitle>
+
+<h1>User List</h1>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Forename</th>
+            <th>Surname</th>
+            <th>Email</th>
+            <th>Date of Birth</th>
+            <th>Account Active</th>
+            <th style="width: 1px;"></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach(var user in Model.Users)
+        {
+            <UserRow User="user" ViewUserCallBack="ViewUser" />
+        }
+    </tbody>
+</table>
+
+<UserListFilterOptions OptionChanged="ChangeFilterOption" ></UserListFilterOptions>
+
+@code {
+    [Inject]
+    public APIService.IApiService API { get; set; } = default!;
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
+    protected UserListViewModel Model { get; set; } = new();
+    protected string EndpointName => "users/List";
+
+    protected async Task ChangeFilterOption(UserRetrievalType type)
+    {
+        string uri = $"{EndpointName}?userType={(int)type}";
+        UserListViewModel? result = await API.GetJsonAsync<UserListViewModel>(uri);
+        Model = result == null ? new UserListViewModel() : result;
+    }
+
+
+    protected override async Task OnParametersSetAsync()
+    {
+        UserListViewModel? result = await API.GetJsonAsync<UserListViewModel>(EndpointName);
+        Model = result == null ? new UserListViewModel() : result;
+    }
+
+    protected void ViewUser(int ID) => NavigationManager.NavigateTo($"/userdetails/{ID}");
+
+
+}

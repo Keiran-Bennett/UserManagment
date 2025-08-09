@@ -1,0 +1,35 @@
+﻿@using UserManagement.Web.Models.Users
+<tr>
+    <td>
+        @User.Id
+    </td>
+    <td>
+        @User.Forename
+    </td>
+    <td>
+        @User.Surname
+    </td>
+    <td>
+        @User.Email
+    </td>
+    <td>
+        @User.DateOfBirth
+    </td>
+    <td>
+        @(User.IsActive ? "Yes" : "No")
+    </td>
+    <td>
+        <button @onclick="() => ViewUser(User.Id)" type="button" class="btn btn-primary">View</button>
+    </td>
+</tr>
+@code {
+    [Parameter]
+    public UserListItemViewModel User { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<int> ViewUserCallBack {get;set;}
+
+    protected async Task ViewUser(int id) => await ViewUserCallBack.InvokeAsync(id);
+
+
+}

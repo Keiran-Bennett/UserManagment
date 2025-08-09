@@ -1,73 +1,120 @@
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Implementations;
 using UserManagement.Services.Domain.Interfaces;
+using UserManagement.Services.Tests;
 
 namespace UserManagement.Data.Tests;
 
 public class UserServiceTests
 {
+    private Mock<IDataContext> _dataContext => SetupActiveUsersDataModels();
+    private readonly Mock<ILogService> _loggerService = new();
+    private UserService CreateService() => new(_dataContext.Object, _loggerService.Object);
+    private UserService CreateServiceWithMockedErrors()
+    {
+        Mock<IDataContext> dataContextWithErrors = new();
+
+        dataContextWithErrors.Setup(s => s.GetAll<User>()).Throws(new System.Exception("test exception"));
+
+        return new(dataContextWithErrors.Object, _loggerService.Object);
+    }
+
     [Fact]
-    public void GetAll_WhenContextReturnsEntities_MustReturnSameEntities()
+    public async Task GetAll_WhenContextReturnsEntities_MustReturnSameEntities()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var service = CreateService();
-        var users = SetupUsers();
 
         // Act: Invokes the method under test with the arranged parameters.
-        var result = service.GetAll();
+        var result = await service.GetAll();
 
         // Assert: Verifies that the action of the method under test behaves as expected.
-        result.Should().BeSameAs(users);
+        result.Should().BeEquivalentTo(CreateUsers().ToList());
     }
 
-    private IQueryable<User> SetupUsers(string forename = "Johnny", string surname = "User", string email = "juser@example.com", bool isActive = true)
+    [Fact]
+    public async Task GetAll_Error_ReturnList()
     {
-        var users = new[]
-        {
-            new User
-            {
-                Forename = forename,
-                Surname = surname,
-                Email = email,
-                IsActive = isActive
-            }
-        }.AsQueryable();
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        var service = CreateServiceWithMockedErrors();
 
-        _dataContext
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await service.GetAll();
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        result.Should().BeEquivalentTo(new List<User> { });
+    }
+
+    [Fact]
+    public async Task GetActiveUsers_WhenContextReturnsEntities_MustReturnSameEntities()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        var service = CreateService();
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await service.GetActiveUsers();
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        result.Should().BeEquivalentTo(CreateUsers().Where(u => u.IsActive).ToList());
+    }
+
+    [Fact]
+    public async Task GetActiveUsers_Error_ReturnEmptyList()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        var service = CreateServiceWithMockedErrors();
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await service.GetAll();
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        result.Should().BeEquivalentTo(new List<User> { });
+    }
+
+    [Fact]
+    public async Task GetInActiveUsers_WhenContextReturnsEntities_MustReturnSameEntities()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        var service = CreateService();
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await service.GetInActiveUsers();
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        result.Should().BeEquivalentTo(CreateUsers().Where(u => !u.IsActive).ToList());
+    }
+
+
+    [Fact]
+    public async Task GetInActiveUsers_Error_ReturnEmptyList()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        var service = CreateServiceWithMockedErrors();
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await service.GetInActiveUsers();
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        result.Should().BeEquivalentTo(new List<User> { });
+    }
+
+
+    private Mock<IDataContext> SetupActiveUsersDataModels()
+    {
+        Mock<IDataContext> dataContext = new();
+        var users = CreateUsers();
+        dataContext
             .Setup(s => s.GetAll<User>())
-            .Returns(users);
-
-        return users;
+            .Returns(new TestAsyncEnumerable<User>(users));
+        return dataContext;
     }
 
-    [Fact]
-    public async Task GetActiveUsers_WhenContextReturnUsers_MustBeOnlyActiveUsers()
-    {
-        var service = CreateService();
-        var users = SetupActiveUsersDataModels();
-
-        var activeUsers = await service.GetActiveUsers();
-
-        activeUsers.Count().Should().Be(1);
-    }
-
-    [Fact]
-    public async Task GetActiveUsers_WhenContextReturnUsers_MustBeOnlyInActiveUsers()
-    {
-        var service = CreateService();
-        var users = SetupActiveUsersDataModels();
-
-        var activeUsers = await service.GetInActiveUsers();
-
-        activeUsers.Count().Should().Be(2);
-    }
-
-    private IQueryable<User> SetupActiveUsersDataModels()
-    {
-        var users = new[]
-        {
+    private static IQueryable<User> CreateUsers() =>
+            new[]
+            {
             new User
             {
                 Id = 1,
@@ -92,16 +139,5 @@ public class UserServiceTests
                 Email = "test2@email.com",
                 IsActive = false,
             }
-        }.AsQueryable();
-
-        _dataContext
-            .Setup(s => s.GetAll<User>())
-            .Returns(users);
-
-        return users;
-    }
-
-    private readonly Mock<IDataContext> _dataContext = new();
-    private readonly Mock<ILogService> _loggerService = new();
-    private UserService CreateService() => new(_dataContext.Object, _loggerService.Object);
+            }.AsQueryable();
 }

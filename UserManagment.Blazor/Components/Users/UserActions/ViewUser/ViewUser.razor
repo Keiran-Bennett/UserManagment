@@ -1,0 +1,40 @@
+﻿@page "/userdetails/{UserId:int}"
+@using UserManagement.Web.Models.Users
+
+
+<h2>User Details</h2>
+
+@if (Model?.IsSuccess == true)
+{
+<p><strong>Forename:</strong> @Model.User.Forename</p>
+<p><strong>Surname:</strong> @Model.User.Surname</p>
+<p><strong>Email:</strong> @Model.User.Email</p>
+<p><strong>Date of Birth:</strong> @Model.User.DateOfBirth.ToString("dd-MM-yyyy")</p>
+<p><strong>Is Active:</strong> @(Model.User.IsActive ? "Yes" : "No")</p>
+
+<UserLogsTable Logs="Model.User.Logs" />
+
+<a href="@($"edit/{Model.User.Id}")" class="btn btn-primary">Edit</a>
+<a href="@($"delete/{Model.User.Id}")" class="btn btn-danger">Delete</a>
+}
+else
+{
+<p>There was an error retrieving the user</p>
+}
+
+@code {
+    [Inject]
+    public APIService.IApiService API { get; set; } = default!;
+
+    [Parameter]
+    public int UserId { get; set; }
+
+    protected UserViewModel Model { get; set; } = default!;
+
+    protected override async Task OnParametersSetAsync()
+    {
+        var result = await API.GetJsonAsync<UserViewModel>($"users/View/{UserId}");
+            Model = result is null ? new() : result;
+
+    }
+}

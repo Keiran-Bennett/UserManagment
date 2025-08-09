@@ -2,8 +2,10 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using UserManagement.Models;
+using UserManagement.Services.Domain.Implementations;
 using UserManagement.Services.Domain.Interfaces;
 using UserManagement.Web.Models.Users;
 using UserManagement.WebMS.Controllers;
@@ -12,23 +14,100 @@ namespace UserManagement.Data.Tests;
 
 public class UserControllerTests
 {
+    private readonly Mock<IUserService> _userService = new();
+
+    private UsersController CreateController() => new(_userService.Object);
+
+    private UsersController CreateListUsersController()
+    {
+        var controller = new UsersController(_userService.Object);
+        SetBlazorHTTPContextOnController(controller);
+        return controller;
+    }
+
+    private static void SetBlazorHTTPContextOnController(UsersController controller)
+    {
+        var httpContext = new DefaultHttpContext();
+        httpContext.Request.Headers["Accept"] = "application/json";
+        controller.ControllerContext = new ControllerContext(){HttpContext = httpContext };
+    }
+
     [Fact]
-    public async Task List_WhenServiceReturnsUsers_ModelMustContainUsers()
+    public async Task List_NoTypePassedInShouldReturnAllUsers_InUserLisViewModel()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var controller = CreateController();
-        var users = SetupUsers();
+        UsersController controller = CreateListUsersController();
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await controller.List(0);
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        _userService.Verify(x => x.GetAll(), Times.Once);
+        result.Should().BeOfType<OkObjectResult>()
+            .Which.Value.Should().BeOfType<UserListViewModel>();
+    }
+
+    [Fact]
+    public async Task List_DefaultPassedInShouldReturnAllUsers_InUserLisViewModel()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        UsersController controller = CreateListUsersController();
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await controller.List(1);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
-        result.Model
-            .Should().BeOfType<UserListViewModel>()
-            .Which.Users.Should().BeEquivalentTo(users);
+        _userService.Verify(x => x.GetAll(), Times.Once);
+        result.Should().BeOfType<OkObjectResult>()
+            .Which.Value.Should().BeOfType<UserListViewModel>();
     }
 
     [Fact]
+    public async Task List_ActiveUsersPassedInShouldReturnOneUser_InUserLisViewModel()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        UsersController controller = CreateListUsersController();
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await controller.List(2);
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        _userService.Verify(x => x.GetActiveUsers(), Times.Once);
+        result.Should().BeOfType<OkObjectResult>()
+            .Which.Value.Should().BeOfType<UserListViewModel>();
+    }
+
+    [Fact]
+    public async Task List_InActiveUsersPassedInShouldReturnOneUser_InUserLisViewModel()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        UsersController controller = CreateListUsersController();
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await controller.List(3);
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        _userService.Verify(x => x.GetInActiveUsers(), Times.Once);
+        result.Should().BeOfType<OkObjectResult>()
+      .Which.Value.Should().BeOfType<UserListViewModel>();
+    }
+
+
+
+
+
+
+
+
+
+
+    /// <summary>
+    /// //////////////////////////////////////////
+    /// </summary>
+    /// <returns></returns>
+
+
+  [Fact]
     public async Task View_WhenServiceReturnsUser_ReturnViewModelWithSuccess()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
@@ -182,7 +261,4 @@ public class UserControllerTests
         return users.ToList();
     }
 
-    private readonly Mock<IUserService> _userService = new();
-    private readonly Mock<ILogService> _logService = new();
-    private UsersController CreateController() => new(_userService.Object);
 }

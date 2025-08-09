@@ -1,0 +1,15 @@
+﻿@using UserManagement.Services
+
+<div class="btn-group" role="group">
+    <a @onclick="() => ChangeFilterOption(UserRetrievalType.Default)" class="btn btn-default">Show All</a>
+    <a @onclick="() => ChangeFilterOption(UserRetrievalType.ActiveUsers)" class=" btn btn-default">Active Only</a>
+    <a @onclick="() => ChangeFilterOption(UserRetrievalType.InActiveUsers)" class=" btn btn-default">Non Active</a>
+</div>
+
+
+@code {
+    [Parameter]
+    public EventCallback<UserRetrievalType> OptionChanged { get; set; }
+
+    protected async Task ChangeFilterOption(UserRetrievalType type) => await OptionChanged.InvokeAsync(type);
+}

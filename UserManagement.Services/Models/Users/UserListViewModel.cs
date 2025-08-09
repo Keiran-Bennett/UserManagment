@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics.Eventing.Reader;
 using System.Linq;
 using UserManagement.Models;
@@ -25,12 +26,6 @@ public class UserListViewModel
 public class LogListViewModel
 {
     public List<LogItemViewModel> Logs { get; set; } = new();
-}
-
-public class UserViewModel
-{
-    public bool IsSuccess { get; set; }
-    public UserListItemViewModel User { get; set; } = new();
 }
 
 
@@ -80,7 +75,7 @@ public class LogItemViewModel
 
 public class UserListItemViewModel
 {
-    public long Id { get; set; }
+    public int Id { get; set; }
     public string Forename { get; set; } = string.Empty;
     public string Surname { get; set; } = string.Empty;
     public string Email { get; set; } = string.Empty;

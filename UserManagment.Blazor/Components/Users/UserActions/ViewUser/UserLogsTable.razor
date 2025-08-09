@@ -1,0 +1,28 @@
+﻿@using UserManagement.Web.Models.Users
+<table class="table table-striped table-hover">
+    <thead class="table-dark">
+        <tr>
+            <th>Id</th>
+            <th>User ID</th>
+            <th>Date of Action</th>
+            <th>Details</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var log in Logs)
+        {
+            <tr>
+                <td>@log.Id</td>
+                <td>@log.UserID</td>
+                <td>@log.DateofAction.ToString("dd-MM-yyyy")</td>
+                <td>@log.Details</td>
+            </tr>
+        }
+    </tbody>
+</table>
+
+@code {
+    [Parameter]
+    public List<LogItemViewModel> Logs { get; set; } = new();
+
+}
