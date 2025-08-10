@@ -4,20 +4,20 @@
 <h2>User List</h2>
 
 <form method="get" asp-action="List" class="mb-3">
-    <div class="form-row">
-        <div class="col">
+    <div class="row">
+        <div class="col-6">
             <label for="startDate">Start Date</label>
             <input type="date" id="startDate" name="startDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" class="form-control" />
         </div>
-        <div class="col">
+        <div class="col-6">
             <label for="endDate">End Date</label>
             <input type="date" id="endDate" name="endDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" class="form-control" />
         </div>
-        <div class="col">
+        <div class="col-6">
             <label for="searchTerm">Description</label>
             <input type="text" id="searchTerm" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search description..." />
         </div>
-                <div class="col">
+                <div class="col-6">
             <label for="type">Type</label>
             <select asp-for="Type" class="form-control"
                     asp-items="@(new SelectList(new[]
@@ -42,7 +42,7 @@
         </div>
         <div class="col d-flex align-items-end mt-3">
             <button type="submit" class="btn btn-primary">Filter</button>
-            <a asp-action="List" class="btn btn-secondary ml-2">Clear</a>
+            <a asp-action="List" class="btn btn-secondary ms-2">Clear</a>
         </div>
     </div>
 </form>
@@ -53,6 +53,7 @@
             <tr>
                 <th>Id</th>
                 <th>DateTime</th>
+                <th>Type</th>
                 <th>Description</th>
             </tr>
         </thead>
@@ -65,6 +66,9 @@
                     </td>
                     <td>
                         @user.DateofAction
+                    </td>
+                    <td>
+                        @user.logType
                     </td>
                     <td>
                         @user.Details

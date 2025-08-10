@@ -43,18 +43,37 @@ public class LogService : ILogService
     {
         try
         {
-            var logs = await _dataAccess.GetAll<Log>()
-              //  .Where(l => DateOnly.FromDateTime(l.DateofAction) >= viewModel.StartDate & DateOnly.FromDateTime(l.DateofAction) <= viewModel.EndDate)
-              // .Where(l => (viewModel.IsFilterEnabled & (int) viewModel.Type > 0) && l.Type == viewModel.Type)
-              // .Where(l => (viewModel.IsFilterEnabled & viewModel.SearchTerm != string.Empty) && l.Details.Contains(viewModel.SearchTerm))
-               .ToListAsync(cancellationToken);
-            return logs;
+            var logsQuery = GetLogsQuery(viewModel);
+            return await logsQuery.ToListAsync(cancellationToken);
         }
         catch
         {
             return new List<Log>();
         }
     }
+
+    private IQueryable<Log> GetLogsQuery(LogListViewModel viewModel)
+    {
+        var logsQuery = GetLogsWithinDatePeriod(viewModel);
+        logsQuery = ApplySpecificFilters(viewModel, logsQuery);
+        return logsQuery;
+    }
+
+    private static IQueryable<Log> ApplySpecificFilters(LogListViewModel viewModel, IQueryable<Log> logsQuery)
+    {
+        if (viewModel.IsFilterEnabled)
+        {
+            if ((int)viewModel.Type > 0)
+                logsQuery = logsQuery.Where(l => l.Type == viewModel.Type);
+            if (!string.IsNullOrEmpty(viewModel.SearchTerm))
+                logsQuery = logsQuery.Where(l => l.Details.Contains(viewModel.SearchTerm));
+        }
+
+        return logsQuery;
+    }
+
+    private IQueryable<Log> GetLogsWithinDatePeriod(LogListViewModel viewModel) => _dataAccess.GetAll<Log>()
+                   .Where(l => DateOnly.FromDateTime(l.DateofAction) >= viewModel.StartDate & DateOnly.FromDateTime(l.DateofAction) <= viewModel.EndDate).AsQueryable();
 
     public async Task<IEnumerable<Log>> GetAllLogsPerUser(int userID, CancellationToken cancellationToken)
     {

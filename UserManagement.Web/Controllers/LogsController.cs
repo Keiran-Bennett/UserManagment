@@ -25,7 +25,9 @@ public class LogsController : Controller
     private async Task<LogListViewModel> CreateLogsListViewModel(LogListViewModel viewModel,CancellationToken token)
     {
         var logs = await _logService.GetLogs(viewModel,token);
-        var model = new LogListViewModel() { Logs = logs.Select(l => (LogDTO)l).ToList() };
+
+        var model = viewModel;
+        model.Logs  = logs.Select(l => (LogDTO)l).ToList();
         return model;
     }
 }
