@@ -23,7 +23,7 @@ public class LogServiceTests
         LogService logService = new(dataContextMock.Object);
 
         // Act: Invokes the method under test with the arranged parameters.
-        var result = await logService.AddLog(new Services.Models.Users.AddLogRequest { UserID = 1, DateOfAction = DateTime.Today, Details = "New User Added", logType = (LogType)1 }, _defaultCancellationToken);
+        var result = await logService.AddLog(new Services.Models.Users.AddLogRequest { UserID = 1, DateOfAction = DateTime.Today, Details = "New User Added", logType = LogType.Add }, _defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeFalse();

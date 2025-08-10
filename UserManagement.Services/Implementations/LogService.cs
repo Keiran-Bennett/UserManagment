@@ -45,9 +45,9 @@ public class LogService : ILogService
         {
             var logs = await _dataAccess.GetAll<Log>()
               //  .Where(l => DateOnly.FromDateTime(l.DateofAction) >= viewModel.StartDate & DateOnly.FromDateTime(l.DateofAction) <= viewModel.EndDate)
-               .Where(l => viewModel.IsFilterEnabled & l.Type == viewModel.Type)
-               .Where(l => viewModel.IsFilterEnabled & viewModel.SearchTerm != string.Empty & l.Details.Contains(viewModel.SearchTerm))
-                .ToListAsync();
+              // .Where(l => (viewModel.IsFilterEnabled & (int) viewModel.Type > 0) && l.Type == viewModel.Type)
+              // .Where(l => (viewModel.IsFilterEnabled & viewModel.SearchTerm != string.Empty) && l.Details.Contains(viewModel.SearchTerm))
+               .ToListAsync(cancellationToken);
             return logs;
         }
         catch

@@ -86,7 +86,7 @@ public class UserService : IUserService
         try
         {
             await _dataAccess.Update(user, cancellationToken);
-            var editUserLogRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been updated to {JsonSerializer.Serialize(user)}" };
+            var editUserLogRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been updated to {JsonSerializer.Serialize(user)}", logType = LogType.Update };
             await LogAction(editUserLogRequest, cancellationToken);
             return true;
         }
@@ -103,7 +103,7 @@ public class UserService : IUserService
             return false;
 
         await _dataAccess.Delete(user, cancellationToken);
-        var logDeleteRequest = new AddLogRequest { UserID = userID, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been deleted" };
+        var logDeleteRequest = new AddLogRequest { UserID = userID, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been deleted", logType = LogType.Delete};
         await LogAction(logDeleteRequest, cancellationToken);
         return true;
     }
@@ -113,7 +113,7 @@ public class UserService : IUserService
         try
         {
             await _dataAccess.Create(user, cancellationToken);
-            var logAddNewUserRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been added with {JsonSerializer.Serialize(user)}" };
+            var logAddNewUserRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been added with {JsonSerializer.Serialize(user)}", logType = LogType.Add };
             await LogAction(logAddNewUserRequest, cancellationToken);
             return true;
         }
