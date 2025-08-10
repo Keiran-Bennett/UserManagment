@@ -12,7 +12,7 @@
 <p><strong>Date of Birth:</strong> @Model.User.DateOfBirth</p>
 <p><strong>Is Active:</strong> @(Model.User.IsActive ? "Yes" : "No")</p>
 
-    <form asp-controller="Users" asp-action="ConfirmDelete" method="post">
+    <form asp-controller="Users" asp-action="ConfirmDelete" asp-route-id="@Model.User.Id" method="post">
         <input type="hidden" name="id" value="@Model.User.Id" />
         <button type="submit" class="btn btn-danger me-2">Delete User</button>
         <a asp-controller="Users" asp-action="List" class="btn btn-secondary">Cancel</a>

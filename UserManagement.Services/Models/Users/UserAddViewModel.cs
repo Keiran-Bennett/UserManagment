@@ -3,5 +3,5 @@
 public class UserAddViewModel
 {
     public bool IsSuccess { get; set; }
-    public UserDTO User { get; set; } = new();
+    public UserFormDTO User { get; set; } = new();
 }

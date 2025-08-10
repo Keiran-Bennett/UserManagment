@@ -1,13 +1,15 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
 using System.Reflection;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserManagement.Models;
 
 namespace UserManagement.Data;
+
+
 
 public class DataContext : DbContext, IDataContext
 {
@@ -49,8 +51,8 @@ public class DataContext : DbContext, IDataContext
         await SaveChangesAsync();
     }
 
-    public async Task<TEntity?> Get<TEntity>(Expression<Func<TEntity, bool>> predicate) where TEntity : class
+    public async Task<TEntity?> Get<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken) where TEntity : class
     {
-       return await base.Set<TEntity>().FirstOrDefaultAsync(predicate);
+       return await base.Set<TEntity>().FirstOrDefaultAsync(predicate,cancellationToken);
     }
 }

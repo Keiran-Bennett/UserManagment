@@ -13,5 +13,4 @@ public class User
     public DateOnly DateOfBirth { get; set; } = default!;
     public bool IsActive { get; set; }
     public  ICollection<Log> Logs { get; set; } = new List<Log>();
-
 }

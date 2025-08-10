@@ -64,7 +64,7 @@ else
         if (Model == null)
             return;
 
-        var response = await API.PostJsonAsync<UserDTO,UserAddViewModel>("users/confirmadd", Model.User) ?? new();
+        var response = await API.PostJsonAsync<UserFormDTO,UserAddViewModel>("users/confirmadd", Model.User) ?? new();
         if (response.IsSuccess)
             NavigationManager.NavigateTo("/userlist");
         else

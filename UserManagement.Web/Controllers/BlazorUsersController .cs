@@ -10,12 +10,11 @@ namespace UserManagement.WebMS.Controllers;
 
 
 
-
-[Route("users")]
-public class UsersController : Controller
+[Route("blazor/users")]
+public class BlazorUsersController : Controller
 {
     private readonly IUserService _userService;
-    public UsersController(IUserService userService)
+    public BlazorUsersController(IUserService userService)
     {
         _userService = userService;
     }
@@ -25,7 +24,7 @@ public class UsersController : Controller
     {
         var users = await GetUsers(userType,token);
         UserListViewModel model = MapUsersToViewModel(users);
-        return View(model);
+        return Ok(model);
     }
 
     private async Task<IEnumerable<Models.User>> GetUsers(int userType, CancellationToken token)
@@ -52,7 +51,7 @@ public class UsersController : Controller
     {
         var user = await _userService.GetUser(id,token);
         UserViewModel viewModel = CreateViewModelFromUser(user);
-        return View(viewModel);
+        return Ok(viewModel);
     }
 
     private static UserViewModel CreateViewModelFromUser(User? user)
@@ -72,7 +71,7 @@ public class UsersController : Controller
     {
         var user = await _userService.GetUser(id,token);
         UserDeleteViewModel viewModel = CreateDeleteViewModelFromUser(user);
-        return View(viewModel);
+        return Ok(viewModel);
     }
 
     private static UserDeleteViewModel CreateDeleteViewModelFromUser(User? user)
@@ -92,9 +91,9 @@ public class UsersController : Controller
     {
         bool IsSuccess = await _userService.DeleteUser(id,cancellationToken);
         if (!IsSuccess)
-            return View(new UserDeleteViewModel { IsSuccess = false });
+            return Ok(new UserDeleteViewModel { IsSuccess = false });
         else
-            return RedirectToAction("List");
+            return Ok(new UserDeleteViewModel { IsSuccess = true });
     }
 
 
@@ -131,20 +130,14 @@ public class UsersController : Controller
         return RedirectToAction("View", new { id = model.User.Id });
     }
 
-    [HttpGet("/add")]
-    public IActionResult Add()
-    {
-        return View(new UserAddViewModel() { IsSuccess = true });
-    }
-
     [HttpPost("confirmadd")]
     public IActionResult ConfirmAdd(UserFormDTO model, CancellationToken cancellationToken)
     {
         if(!ModelState.IsValid)
-            return View("add",new UserAddViewModel { User = model, IsSuccess = true });
+            return Ok(new UserAddViewModel { User = model, IsSuccess = true });
 
 
 
-       return View(new UserAddViewModel { IsSuccess=true });
+       return Ok(new UserAddViewModel { IsSuccess=true });
     }
 }

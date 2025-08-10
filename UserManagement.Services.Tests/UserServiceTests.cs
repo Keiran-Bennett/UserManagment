@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Threading;
 using System.Threading.Tasks;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Implementations;
@@ -28,9 +29,10 @@ public class UserServiceTests
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var service = CreateService();
+        var cts = new CancellationTokenSource();
 
         // Act: Invokes the method under test with the arranged parameters.
-        var result = await service.GetAll();
+        var result = await service.GetAll(cts.Token);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeEquivalentTo(CreateUsers().ToList());
@@ -41,10 +43,10 @@ public class UserServiceTests
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var service = CreateServiceWithMockedErrors();
+        var cts = new CancellationTokenSource();
 
         // Act: Invokes the method under test with the arranged parameters.
-        var result = await service.GetAll();
-
+        var result = await service.GetAll(cts.Token);
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeEquivalentTo(new List<User> { });
     }
@@ -54,9 +56,9 @@ public class UserServiceTests
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var service = CreateService();
-
+        var cts = new CancellationTokenSource();
         // Act: Invokes the method under test with the arranged parameters.
-        var result = await service.GetActiveUsers();
+        var result = await service.GetActiveUsers(cts.Token);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeEquivalentTo(CreateUsers().Where(u => u.IsActive).ToList());
@@ -67,9 +69,9 @@ public class UserServiceTests
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var service = CreateServiceWithMockedErrors();
-
+        var cts = new CancellationTokenSource();
         // Act: Invokes the method under test with the arranged parameters.
-        var result = await service.GetAll();
+        var result = await service.GetAll(cts.Token);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeEquivalentTo(new List<User> { });
@@ -80,9 +82,9 @@ public class UserServiceTests
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var service = CreateService();
-
+        var cts = new CancellationTokenSource();
         // Act: Invokes the method under test with the arranged parameters.
-        var result = await service.GetInActiveUsers();
+        var result = await service.GetInActiveUsers(cts.Token);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeEquivalentTo(CreateUsers().Where(u => !u.IsActive).ToList());
@@ -94,9 +96,9 @@ public class UserServiceTests
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var service = CreateServiceWithMockedErrors();
-
+        var cts = new CancellationTokenSource();
         // Act: Invokes the method under test with the arranged parameters.
-        var result = await service.GetInActiveUsers();
+        var result = await service.GetInActiveUsers(cts.Token);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeEquivalentTo(new List<User> { });
@@ -147,11 +149,11 @@ public class UserServiceTests
     public async Task GetUser_Error_RethrowsException()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        _dataContext.Setup(s => s.Get<User>(It.IsAny<Expression<Func<User, bool>>>())).Throws(new System.Exception("test exception"));
+        _dataContext.Setup(s => s.Get<User>(It.IsAny<Expression<Func<User, bool>>>(),It.IsAny<CancellationToken>())).Throws(new System.Exception("test exception"));
         var service = CreateServiceWithMockedErrors();
-
+        var cts = new CancellationTokenSource();
         // Act: Invokes the method under test with the arranged parameters.
-        Func<Task<User>> result = async () => await service.GetUser(1);
+        Func<Task<User>> result = async () => await service.GetUser(1,cts.Token);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         await result.Should().ThrowAsync<Exception>();
@@ -160,24 +162,19 @@ public class UserServiceTests
     [Fact]
     public async Task GetUser_Success_ReturnsUser()
     {
-        // Arrange
-        _dataContext
-        .Setup(s => s.Get<User>(It.Is<Expression<Func<User, bool>>>(u => u.Compile()(new User { Id = 1 }))))
-        .ReturnsAsync(new User { Forename = "bob", Surname = "Jones" });
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        Mock<IDataContext> dataContext = new();
+        dataContext
+            .Setup(s => s.Get<User>(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
+            .ReturnsAsync(new User { Id = 2, Forename = "bob", Surname = "Jones" });
+       var service = new UserService(dataContext.Object, _loggerService.Object);
+        var cts = new CancellationTokenSource();
 
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await service.GetUser(2, cts.Token);
 
-        var service = new UserService(_dataContext.Object, _loggerService.Object);
-
-        // Act
-        var result = await service.GetUser(1);
-
-        // Assert
-        result.Should().BeEquivalentTo(new User { Forename = "bob", Surname = "Jones" });
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        result.Should().BeEquivalentTo(new User { Id = 2, Forename = "bob", Surname = "Jones" });
+        _loggerService.Verify(l => l.GetAllLogsPerUser(2), Times.Once);
     }
-
-
-
-
-
-
 }

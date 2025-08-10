@@ -10,7 +10,7 @@ builder.Services.AddRazorComponents()
 
 builder.Services.AddHttpClient("ApiClient", client =>
 {
-    client.BaseAddress = new Uri("https://localhost:7084/"); // API base URL
+    client.BaseAddress = new Uri("https://localhost:7084/blazor/"); // API base URL
     client.DefaultRequestHeaders.Accept.Clear();
     client.DefaultRequestHeaders.Accept.Add(
         new MediaTypeWithQualityHeaderValue("application/json"));

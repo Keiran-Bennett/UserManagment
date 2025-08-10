@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserManagement.Data;
@@ -17,11 +18,11 @@ public class UserService : IUserService
         _dataAccess = dataAccess;
         _logService = logService;
     }
-    public async Task<IEnumerable<User>> GetAll()
+    public async Task<IEnumerable<User>> GetAll(CancellationToken cancellationToken)
     {
         try
         {
-            return await _dataAccess.GetAll<User>().ToListAsync();
+            return await _dataAccess.GetAll<User>().ToListAsync(cancellationToken);
         }
         catch
         {
@@ -30,11 +31,11 @@ public class UserService : IUserService
     }
 
 
-    public async Task<IEnumerable<User>> GetActiveUsers()
+    public async Task<IEnumerable<User>> GetActiveUsers(CancellationToken cancellationToken)
     {
         try
         {
-            return await _dataAccess.GetAll<User>().Where(u => u.IsActive).ToListAsync();
+            return await _dataAccess.GetAll<User>().Where(u => u.IsActive).ToListAsync(cancellationToken);
         }
         catch
         {
@@ -42,11 +43,11 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<IEnumerable<User>> GetInActiveUsers()
+    public async Task<IEnumerable<User>> GetInActiveUsers(CancellationToken cancellationToken)
     {
         try
         {
-            return await _dataAccess.GetAll<User>().Where(u => !u.IsActive).ToListAsync();
+            return await _dataAccess.GetAll<User>().Where(u => !u.IsActive).ToListAsync(cancellationToken);
         }
         catch
         {
@@ -54,11 +55,11 @@ public class UserService : IUserService
         }
     }
 
-    public async Task<User> GetUser(int userID)
+    public async Task<User> GetUser(int userID, CancellationToken cancellationToken)
     {
         try
         {
-            return await GetUserWithLogs(userID) ?? throw new System.Exception("User cannot be found");
+            return await GetUserWithLogs(userID, cancellationToken) ?? throw new System.Exception("User cannot be found");
         }
         catch
         {
@@ -66,9 +67,9 @@ public class UserService : IUserService
         }        
     }
     
-    private async Task<User?> GetUserWithLogs(long userID)
+    private async Task<User?> GetUserWithLogs(int userID, CancellationToken cancellationToken)
     {
-        var user = await _dataAccess.Get<User>(u => u.Id == userID);
+        var user = await _dataAccess.Get<User>(u => u.Id == userID,cancellationToken);
         if (user != null)
         {
             var logs = await _logService.GetAllLogsPerUser(user.Id);
@@ -78,7 +79,7 @@ public class UserService : IUserService
         return user;
     }
 
-    public async Task<bool> EditUser(User user)
+    public async Task<bool> EditUser(User user, CancellationToken cancellationToken)
     {
         await _dataAccess.Update(user);
         var editUserLogRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been updated" };
@@ -87,9 +88,9 @@ public class UserService : IUserService
         return true;
     }
 
-    public async Task<bool> DeleteUser(long userID)
+    public async Task<bool> DeleteUser(int userID, CancellationToken cancellationToken)
     {
-        User? user = await _dataAccess.Get<User>(u => u.Id == userID);
+        User? user = await _dataAccess.Get<User>(u => u.Id == userID, cancellationToken);
         if (user is null)
             return false;
 
@@ -100,7 +101,7 @@ public class UserService : IUserService
         return true;
     }
 
-    public async Task<bool> AddUser(User user)
+    public async Task<bool> AddUser(User user, CancellationToken cancellationToken)
     {
         await _dataAccess.Create(user);
         var logAddNewUserRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been added" };
