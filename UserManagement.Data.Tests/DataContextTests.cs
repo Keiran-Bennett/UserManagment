@@ -70,7 +70,7 @@ public class DataContextTests
     }
 
     [Fact]
-    public async Task UpdateEntity_EEntityHasUpdatedValues()
+    public async Task UpdateEntity_EntityHasUpdatedValues()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var dataContext = CreateDataContext("5");
@@ -81,7 +81,6 @@ public class DataContextTests
         await dataContext.Update(user, _defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
-
         User? retrievedUser = await dataContext.Get<User>(u => u.Id == 1, _defaultCancellationToken) ?? new User();
         retrievedUser.Should().NotBeNull();
         retrievedUser.Should().BeEquivalentTo(user);
