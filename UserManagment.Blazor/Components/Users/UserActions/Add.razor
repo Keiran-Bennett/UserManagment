@@ -3,13 +3,10 @@
 
 <h2>Add User</h2>
 
-@if (Model?.IsSuccess == true)
-{
-    <EditForm Model="Model.User" OnValidSubmit="HandleValidSubmit" formname="AddUserForm">
+
+    <EditForm Model="Model.User" OnValidSubmit="HandleValidSubmit" OnInvalidSubmit="HandleValidSubmit" formname="AddUserForm">
         <DataAnnotationsValidator />
         <ValidationSummary />
-
-        <input type="hidden" @bind="Model.User.Id" />
 
         <div class="form-group">
             <label for="forename">Forename</label>
@@ -44,11 +41,7 @@
         <button type="submit" class="btn btn-primary">Save</button>
         <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
     </EditForm>
-}
-else
-{
-    <p>There was an error retrieving the user</p>
-}
+
 
 @code {
     [Inject]
@@ -57,7 +50,14 @@ else
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
 
-    protected UserAddViewModel Model { get; set; } = new() { IsSuccess = true};
+    protected UserAddViewModel Model { get; set; } = default!;
+
+    protected override void OnInitialized()
+    {
+        Model = new();
+        if (Model.User == null)
+            Model.User = new UserFormDTO();
+    }
 
     private async Task HandleValidSubmit()
     {

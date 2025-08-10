@@ -2,8 +2,6 @@
 @model UserEditViewModel
 
 <h2>User Details</h2>
-@if(Model.IsSuccess)
-{
 
 <h2>Edit User</h2>
 
@@ -44,11 +42,6 @@
     <a asp-action="View" asp-route-id="@Model.User.Id" class="btn btn-secondary">Cancel</a>
 </form>
 
-}
-else
-{
-    <p>There was an error retrieving the user</p>
-}
 
 
 @{

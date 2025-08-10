@@ -8,9 +8,6 @@ using UserManagement.Web.Models.Users;
 
 namespace UserManagement.WebMS.Controllers;
 
-
-
-
 [Route("users")]
 public class UsersController : Controller
 {
@@ -122,7 +119,7 @@ public class UsersController : Controller
     public async Task<IActionResult> ConfirmEdit(UserEditViewModel model, CancellationToken cancellationToken)
     {
         if (!ModelState.IsValid)
-            return View(model);
+            return View("edit",model);
 
         var result = await _userService.EditUser((User)model.User, cancellationToken);
         if (!result)
@@ -138,13 +135,13 @@ public class UsersController : Controller
     }
 
     [HttpPost("confirmadd")]
-    public IActionResult ConfirmAdd(UserFormDTO model, CancellationToken cancellationToken)
+    public async Task<IActionResult> ConfirmAdd(UserAddViewModel model, CancellationToken cancellationToken)
     {
         if(!ModelState.IsValid)
-            return View("add",new UserAddViewModel { User = model, IsSuccess = true });
+            return View("add",model);
 
+       var result = await _userService.AddUser((User)model.User, cancellationToken);
 
-
-       return View(new UserAddViewModel { IsSuccess=true });
+       return RedirectToAction("List");
     }
 }

@@ -131,13 +131,12 @@ public class BlazorUsersController : Controller
     }
 
     [HttpPost("confirmadd")]
-    public IActionResult ConfirmAdd(UserFormDTO model, CancellationToken cancellationToken)
+    public async Task<IActionResult> ConfirmAdd(UserFormDTO model, CancellationToken cancellationToken)
     {
         if(!ModelState.IsValid)
             return Ok(new UserAddViewModel { User = model, IsSuccess = true });
 
-
-
-       return Ok(new UserAddViewModel { IsSuccess=true });
+        var result = await _userService.AddUser((User) model, cancellationToken);
+        return Ok(new UserAddViewModel { IsSuccess=result });
     }
 }

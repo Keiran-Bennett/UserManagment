@@ -43,8 +43,6 @@ public class BlazorUserControllerTests
             .Which.Value.Should().BeOfType<UserListViewModel>();
     }
 
-
-
     [Fact]
     public async Task List_ActiveUsersPassedInShouldReturnOneUser_InUserLisViewModel()
     {
@@ -65,7 +63,6 @@ public class BlazorUserControllerTests
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = new BlazorUsersController(_userService.Object);
-
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await controller.List(3, _defaultCancellationToken);
@@ -169,13 +166,13 @@ public class BlazorUserControllerTests
     }
 
     [Fact]
-    public void ConfirmAdd_Blazor_ReturnViewModel_IsSuccessIsTrue()
+    public async Task ConfirmAdd_Blazor_ReturnViewModel_IsSuccessIsTrue()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var controller = new BlazorUsersController(_userService.Object);
+        var controller = CreateAddUserControllerWithSuccess();
 
         // Act: Invokes the method under test with the arranged parameters.
-        var result = controller.ConfirmAdd(new(), _defaultCancellationToken);
+        var result = await controller.ConfirmAdd(CreateAddModel(), _defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeOfType<OkObjectResult>()
@@ -183,23 +180,57 @@ public class BlazorUserControllerTests
       .Which.IsSuccess.Should().BeTrue();
     }
 
+
     [Fact]
-    public void ConfirmAdd_Blazor_InvalidModel_IsSuccessIsFalse()
+    public async Task ConfirmAdd_ServiceSucceeds_ReturnsSuccessOnModel()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var controller = new BlazorUsersController(_userService.Object);
-        controller.ModelState.AddModelError("Forename", "Forename is required");
-        controller.ModelState.AddModelError("Email", "Forename is required");
+        var controller = CreateAddUserControllerWithSuccess();
+
         // Act: Invokes the method under test with the arranged parameters.
-        var result = controller.ConfirmAdd(new() { Surname = "Test", Email = "test", }, _defaultCancellationToken);
+        var result = await controller.ConfirmAdd(CreateAddModel(), _defaultCancellationToken);
 
         result.Should().BeOfType<OkObjectResult>()
-        .Which.Value.Should().BeOfType<UserAddViewModel>()
-        .Which.IsSuccess.Should().BeTrue(); 
-
-
+           .Which.Value.Should().BeOfType<UserAddViewModel>()
+     .Which.IsSuccess.Should().BeTrue();
     }
 
+    private static BlazorUsersController CreateAddUserControllerWithSuccess()
+    {
+        Mock<IUserService> userService = new();
+        userService.Setup(us => us.AddUser(It.IsAny<User>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var controller = new BlazorUsersController(userService.Object);
+        return controller;
+    }
+
+    [Fact]
+    public async Task ConfirmAdd_ServiceFails_ReturnsFalseOnModel()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        var controller = CreateAddUserControllerWithFailure();
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await controller.ConfirmAdd(CreateAddModel(), _defaultCancellationToken);
+
+        result.Should().BeOfType<OkObjectResult>()
+            .Which.Value.Should().BeOfType<UserAddViewModel>()
+            .Which.IsSuccess.Should().BeFalse();
+    }
+
+    private static BlazorUsersController CreateAddUserControllerWithFailure()
+    {
+        Mock<IUserService> userService = new();
+        userService.Setup(us => us.AddUser(It.IsAny<User>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var controller = new BlazorUsersController(userService.Object);
+        return controller;
+    }
+
+    private static UserFormDTO CreateAddModel() =>
+         new UserFormDTO
+        {
+            Surname = "Test",
+            Email = "test",
+        };
 }
 
 
@@ -226,7 +257,7 @@ public class UserControllerTests
         // Assert: Verifies that the action of the method under test behaves as expected.
         _userService.Verify(x => x.GetAll(It.IsAny<CancellationToken>()), Times.Once);
         result.Should().BeOfType<ViewResult>()
-.Which.Model.Should().BeOfType<UserListViewModel>();
+        .Which.Model.Should().BeOfType<UserListViewModel>();
     }
 
 
@@ -243,7 +274,7 @@ public class UserControllerTests
         // Assert: Verifies that the action of the method under test behaves as expected.
         _userService.Verify(x => x.GetActiveUsers(It.IsAny<CancellationToken>()), Times.Once);
         result.Should().BeOfType<ViewResult>()
-.Which.Model.Should().BeOfType<UserListViewModel>();
+        .Which.Model.Should().BeOfType<UserListViewModel>();
     }
 
     [Fact]
@@ -280,9 +311,6 @@ public class UserControllerTests
         model.IsSuccess.Should().BeTrue();
         model.User.Should().BeEquivalentTo((UserDTO)returnUser);
     }
-
-
-
 
     [Fact]
     public async Task Delete_GetUser_UserIsNull_Razor_ReturnViewModel_IsSuccessIsFalse()
@@ -322,15 +350,12 @@ public class UserControllerTests
         model.User.Should().BeEquivalentTo((UserDTO)returnUser);
     }
 
-
-
     [Fact]
     public async Task ConfirmDelete_UserDelete_Razor_Success_ReturnmodelWithSuccessFlag()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         _userService.Setup(us => us.DeleteUser(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
         var controller = new UsersController(_userService.Object);
-
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await controller.ConfirmDelete(1, _defaultCancellationToken);
@@ -346,7 +371,6 @@ public class UserControllerTests
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         _userService.Setup(us => us.DeleteUser(1, It.IsAny<CancellationToken>())).ReturnsAsync(false);
         var controller = new UsersController(_userService.Object);
-
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await controller.ConfirmDelete(1, _defaultCancellationToken);
@@ -365,7 +389,6 @@ public class UserControllerTests
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = new UsersController(_userService.Object);
 
-
         // Act: Invokes the method under test with the arranged parameters.
         var result = controller.Add();
 
@@ -376,39 +399,70 @@ public class UserControllerTests
     }
 
     [Fact]
-    public void ConfirmAdd_Razor_ReturnViewModel_IsSuccessIsTrue()
+    public async Task ConfirmAdd_Razor_ReturnViewModel_IsRedirectResukt()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var controller = new UsersController(_userService.Object);
-
+        Mock<IUserService> userService = new();
+        userService.Setup(us => us.AddUser(It.IsAny<User>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var controller = new UsersController(userService.Object);
 
         // Act: Invokes the method under test with the arranged parameters.
-        var result = controller.ConfirmAdd(new(), _defaultCancellationToken);
+        var result = await controller.ConfirmAdd(new(), _defaultCancellationToken);
 
         // Assert: Verifies that the action of
         // the method under test behaves as expected.
-        result.Should().BeOfType<ViewResult>()
-      .Which.Model.Should().BeOfType<UserAddViewModel>()
-      .Which.IsSuccess.Should().BeTrue();
+        result.Should().BeOfType<RedirectToActionResult>();
     }
 
 
     [Fact]
-    public void ConfirmAdd_Razor_InvalidModel_IsSuccessIsTrue()
+    public async Task ConfirmAdd_Razor_InvalidModel_IsRedirectResult()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = new UsersController(_userService.Object);
 
-        controller.ModelState.AddModelError("Forename", "Forename is required");
-        controller.ModelState.AddModelError("Email", "Forename is required");
         // Act: Invokes the method under test with the arranged parameters.
-        var result = controller.ConfirmAdd(new() { Surname = "Test", Email = "test", }, _defaultCancellationToken);
+        var result = await controller.ConfirmAdd(CreateAddModel(), _defaultCancellationToken);
 
-        result.Should().BeOfType<ViewResult>()
-        .Which.Model.Should().BeOfType<UserAddViewModel>();
-
-
+        result.Should().BeOfType<RedirectToActionResult>();
     }
+
+
+    [Fact]
+    public async Task ConfirmAdd_ServiceSucceeds_IsRedirectResult()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        _userService.Setup(us => us.AddUser(It.IsAny<User>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var controller = new UsersController(_userService.Object);
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await controller.ConfirmAdd(CreateAddModel(), _defaultCancellationToken);
+
+        result.Should().BeOfType<RedirectToActionResult>();
+    }
+
+    [Fact]
+    public async Task ConfirmAdd_ServiceFails_IsRedirectResult()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        Mock<IUserService> userService = new();
+        userService.Setup(us => us.AddUser(It.IsAny<User>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var controller = new UsersController(userService.Object);
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await controller.ConfirmAdd(CreateAddModel(), _defaultCancellationToken);
+
+        result.Should().BeOfType<RedirectToActionResult>();
+    }
+
+    private static UserAddViewModel CreateAddModel() => new UserAddViewModel()
+    {
+        User = new UserFormDTO
+        {
+            Surname = "Test",
+            Email = "test",
+        }
+    };
 }
 
 

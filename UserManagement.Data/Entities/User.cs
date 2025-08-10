@@ -12,5 +12,5 @@ public class User
     public string Email { get; set; } = default!;
     public DateOnly DateOfBirth { get; set; } = default!;
     public bool IsActive { get; set; }
-    public  ICollection<Log> Logs { get; set; } = new List<Log>();
+    public  IEnumerable<Log> Logs { get; set; } = new List<Log>();
 }

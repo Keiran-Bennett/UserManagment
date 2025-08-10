@@ -9,8 +9,6 @@ using UserManagement.Models;
 
 namespace UserManagement.Data;
 
-
-
 public class DataContext : DbContext, IDataContext
 {
     public DataContext() => Database.EnsureCreated();
@@ -33,22 +31,22 @@ public class DataContext : DbContext, IDataContext
     public IQueryable<TEntity> GetAll<TEntity>() where TEntity : class
         => base.Set<TEntity>();
 
-    public async Task Create<TEntity>(TEntity entity) where TEntity : class
+    public async Task Create<TEntity>(TEntity entity, CancellationToken token) where TEntity : class
     {
         await base.AddAsync(entity);
-        await SaveChangesAsync();
+        await SaveChangesAsync(token);
     }
 
-    public new async Task Update<TEntity>(TEntity entity) where TEntity : class
+    public async Task Update<TEntity>(TEntity entity, CancellationToken token) where TEntity : class
     {
         base.Update(entity);
-        await SaveChangesAsync(); 
+        await SaveChangesAsync(token); 
     }
 
-    public async Task Delete<TEntity>(TEntity entity) where TEntity : class
+    public async Task Delete<TEntity>(TEntity entity, CancellationToken token) where TEntity : class
     {
         base.Remove(entity);
-        await SaveChangesAsync();
+        await SaveChangesAsync(token);
     }
 
     public async Task<TEntity?> Get<TEntity>(Expression<Func<TEntity, bool>> predicate, CancellationToken cancellationToken) where TEntity : class

@@ -1,8 +1,6 @@
 ﻿using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
-using Microsoft.AspNetCore.Components.Forms;
-using UserManagement.Models;
-using UserManagement.Services;
 using UserManagement.Services.Domain.Interfaces;
 using UserManagement.Web.Models.Users;
 
@@ -18,15 +16,15 @@ public class LogsController : Controller
     }
 
     [HttpGet]
-    public async Task<ViewResult> List()
+    public async Task<ViewResult> List(LogListViewModel viewmodel, CancellationToken cancellationToken)
     {
-        LogListViewModel viewModel = await CreateLogsListViewModel();
+        LogListViewModel viewModel = await CreateLogsListViewModel(cancellationToken);
         return View(viewModel);
     }
 
-    private async Task<LogListViewModel> CreateLogsListViewModel()
+    private async Task<LogListViewModel> CreateLogsListViewModel(CancellationToken token)
     {
-        var logs = await _logService.GetAllLogs();
+        var logs = await _logService.GetAllLogs(token);
         var model = new LogListViewModel() { Logs = logs.Select(l => (LogDTO)l).ToList() };
         return model;
     }

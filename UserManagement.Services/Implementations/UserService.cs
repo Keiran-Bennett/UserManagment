@@ -1,11 +1,13 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserManagement.Data;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Interfaces;
+using UserManagement.Services.Models.Users;
 
 namespace UserManagement.Services.Domain.Implementations;
 
@@ -81,11 +83,17 @@ public class UserService : IUserService
 
     public async Task<bool> EditUser(User user, CancellationToken cancellationToken)
     {
-        await _dataAccess.Update(user);
-        var editUserLogRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been updated" };
-        await LogAction(editUserLogRequest);
-
-        return true;
+        try
+        {
+            await _dataAccess.Update(user, cancellationToken);
+            var editUserLogRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been updated to {JsonSerializer.Serialize(user)}" };
+            await LogAction(editUserLogRequest, cancellationToken);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
     public async Task<bool> DeleteUser(int userID, CancellationToken cancellationToken)
@@ -94,21 +102,28 @@ public class UserService : IUserService
         if (user is null)
             return false;
 
-        await _dataAccess.Delete(user);
+        await _dataAccess.Delete(user, cancellationToken);
         var logDeleteRequest = new AddLogRequest { UserID = userID, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been deleted" };
-        await LogAction(logDeleteRequest);
-
+        await LogAction(logDeleteRequest, cancellationToken);
         return true;
     }
 
     public async Task<bool> AddUser(User user, CancellationToken cancellationToken)
     {
-        await _dataAccess.Create(user);
-        var logAddNewUserRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been added" };
-        await LogAction(logAddNewUserRequest);
-        return true;
+        try
+        {
+            await _dataAccess.Create(user, cancellationToken);
+            var logAddNewUserRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been added" };
+            await LogAction(logAddNewUserRequest, cancellationToken);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
+       
     }
 
-    private async Task LogAction(AddLogRequest logDeleteRequest) => await _logService.AddLog(logDeleteRequest);
+    private async Task LogAction(AddLogRequest logRequest, CancellationToken cancellationToken) => await _logService.AddLog(logRequest,cancellationToken);
 }
 

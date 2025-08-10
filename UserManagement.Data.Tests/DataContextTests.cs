@@ -10,21 +10,19 @@ public class DataContextTests
 {
     private CancellationToken _defaultCancellationToken => new CancellationTokenSource().Token;
 
-
     [Fact]
     public async Task GetEntity_WhenMatchesPredicate_UserShouldMatchOneInDB()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var dataContext = CreateDataContext("1");
         // Act: Invokes the method under test with the arranged parameters.
-        User? entity = await dataContext.Get<User>(u => u.Forename == "Robin",_defaultCancellationToken);
+        User? entity = await dataContext.Get<User>(u => u.Forename == "Robin", _defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         var expectedResult = new User { Id = 11, Forename = "Robin", Surname = "Feld", Email = "rfeld@example.com", DateOfBirth = new System.DateOnly(2000, 2, 25), IsActive = true };
         entity.Should().BeEquivalentTo(expectedResult);
         entity.Should().NotBeNull();
     }
-
 
     [Fact]
     public async Task GetEntity_WhenDoesNotMatchPredicate_UserShouldBeNull()
@@ -60,15 +58,34 @@ public class DataContextTests
 
         // Act: Invokes the method under test with the arranged parameters.
         User? deletedUser = await dataContext.Get<User>(u => u.Id == 1, _defaultCancellationToken);
-        await dataContext.Delete<User>((User)deletedUser!);
+        await dataContext.Delete<User>((User)deletedUser!, _defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
-        if(dataContext is DataContext dc)
+        if (dataContext is DataContext dc)
         {
             List<User> testUsers = CreateTestUsers();
             testUsers.RemoveAt(0);
             dc.Users.Should().BeEquivalentTo(testUsers);
         }
+    }
+
+    [Fact]
+    public async Task UpdateEntity_EEntityHasUpdatedValues()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        var dataContext = CreateDataContext("5");
+
+        User user = await dataContext.Get<User>(u => u.Id == 1, _defaultCancellationToken) ?? new User();
+        user.Email = "testupdate";
+        // Act: Invokes the method under test with the arranged parameters.
+        await dataContext.Update(user, _defaultCancellationToken);
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+
+        User? retrievedUser = await dataContext.Get<User>(u => u.Id == 1, _defaultCancellationToken) ?? new User();
+        retrievedUser.Should().NotBeNull();
+        retrievedUser.Should().BeEquivalentTo(user);
+
     }
 
     private IDataContext CreateDataContext(string name)

@@ -3,6 +3,27 @@
 
 <h2>User List</h2>
 
+<form method="get" asp-action="List" class="mb-3">
+    <div class="form-row">
+        <div class="col">
+            <label for="startDate">Start Date</label>
+            <input type="date" id="startDate" name="startDate" value="@Model.StartDate.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col">
+            <label for="endDate">End Date</label>
+            <input type="date" id="endDate" name="endDate" value="@Model.EndDate.ToString("yyyy-MM-dd")" class="form-control" />
+        </div>
+        <div class="col">
+            <label for="searchTerm">Description</label>
+            <input type="text" id="searchTerm" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search description..." />
+        </div>
+        <div class="col d-flex align-items-end mt-3">
+            <button type="submit" class="btn btn-primary">Filter</button>
+            <a asp-action="List" class="btn btn-secondary ml-2">Clear</a>
+        </div>
+    </div>
+</form>
+
 <div class="table-responsive">
     <table class="table table-striped">
         <thead>

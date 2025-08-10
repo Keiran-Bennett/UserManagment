@@ -1,5 +1,6 @@
 ﻿using System;
 using UserManagement.Models;
+using UserManagement.Services.Models.Users;
 
 namespace UserManagement.Web.Models.Users;
 
@@ -9,6 +10,8 @@ public class LogDTO
     public int UserID { get; set; } = default!;
     public DateTime DateofAction { get; set; } = default!;
     public string Details { get; set; } = default!;
+    public LogType logType { get; set; }
+
 
     public static explicit operator Log(LogDTO model) => new Log
     {
@@ -16,6 +19,7 @@ public class LogDTO
         UserID = model.UserID,
         DateofAction = model.DateofAction,
         Details = model.Details,
+        Type = (int) model.logType,
     };
 
     public static explicit operator LogDTO(Log log) => new LogDTO
@@ -24,6 +28,7 @@ public class LogDTO
         UserID = log.UserID,
         DateofAction = log.DateofAction,
         Details = log.Details,
+        logType = (LogType) log.Type
     };
 
 }

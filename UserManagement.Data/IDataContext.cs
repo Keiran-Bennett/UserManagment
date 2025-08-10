@@ -22,7 +22,7 @@ public interface IDataContext
     /// <typeparam name="TEntity"></typeparam>
     /// <param name="entity"></param>
     /// <returns></returns>
-    Task Create<TEntity>(TEntity entity) where TEntity : class;
+    Task Create<TEntity>(TEntity entity, CancellationToken token) where TEntity : class;
 
     /// <summary>
     /// Uodate an existing item matching the ID
@@ -30,7 +30,7 @@ public interface IDataContext
     /// <typeparam name="TEntity"></typeparam>
     /// <param name="entity"></param>
     /// <returns></returns>
-    Task Update<TEntity>(TEntity entity) where TEntity : class;
+    Task Update<TEntity>(TEntity entity, CancellationToken token) where TEntity : class;
 
-    Task Delete<TEntity>(TEntity entity) where TEntity : class;
+    Task Delete<TEntity>(TEntity entitym, CancellationToken token) where TEntity : class;
 }
