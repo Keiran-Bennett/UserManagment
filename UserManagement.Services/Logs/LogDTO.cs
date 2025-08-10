@@ -1,8 +1,7 @@
 ﻿using System;
 using UserManagement.Models;
-using UserManagement.Services.Models.Users;
 
-namespace UserManagement.Web.Models.Users;
+namespace UserManagement.Services.Logs;
 
 public class LogDTO
 {

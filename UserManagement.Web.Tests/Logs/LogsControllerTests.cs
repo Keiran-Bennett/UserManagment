@@ -5,11 +5,10 @@ using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
 using UserManagement.Models;
-using UserManagement.Services.Domain.Interfaces;
-using UserManagement.Web.Models.Users;
+using UserManagement.Services.Logs;
 using UserManagement.WebMS.Controllers;
 
-namespace UserManagement.Web.Tests;
+namespace UserManagement.Web.Tests.Logs;
 public class LogsControllerTests
 {
     private CancellationToken _defaultCancellationToken => new CancellationTokenSource().Token;
@@ -18,7 +17,7 @@ public class LogsControllerTests
     public async Task List_DefaultPassedInShouldReturnAllLogs_InUserLisViewModel()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        List<Log> logs = CreateLogs();
+        var logs = CreateLogs();
         var logService = CreateMockLogService(logs);
         LogsController controller = new(logService.Object);
 
@@ -26,7 +25,7 @@ public class LogsControllerTests
         var result = await controller.List(new(), _defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
-        List<LogDTO> expectedLogs = logs.Select(l => (LogDTO)l).ToList();
+        var expectedLogs = logs.Select(l => (LogDTO)l).ToList();
         result.Should().BeOfType<ViewResult>()
             .Which.Model.Should().BeOfType<LogListViewModel>()
             .Which.Logs.Should().BeEquivalentTo(expectedLogs, o => o.Excluding(l => l.DateofAction));

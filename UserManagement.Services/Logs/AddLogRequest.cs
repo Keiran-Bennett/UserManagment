@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace UserManagement.Services.Models.Users;
+namespace UserManagement.Services.Logs;
 
 public class AddLogRequest
 {

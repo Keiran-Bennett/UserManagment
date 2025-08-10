@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace UserManagement.Web.Models.Users;
+namespace UserManagement.Services.Logs;
 
 public class LogListViewModel
 {

@@ -2,7 +2,7 @@
 using System.ComponentModel.DataAnnotations;
 using UserManagement.Models;
 
-namespace UserManagement.Web.Models.Users;
+namespace UserManagement.Services.Users.Models;
 
 public class UserFormDTO
 {
@@ -36,7 +36,7 @@ public class UserFormDTO
 
     public static explicit operator User(UserFormDTO model) => new User
     {
-        Id = (int)model.Id,
+        Id = model.Id,
         Forename = model.Forename,
         Surname = model.Surname,
         Email = model.Email,

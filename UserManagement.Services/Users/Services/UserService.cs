@@ -6,10 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserManagement.Data;
 using UserManagement.Models;
-using UserManagement.Services.Domain.Interfaces;
-using UserManagement.Services.Models.Users;
+using UserManagement.Services.Logs;
 
-namespace UserManagement.Services.Domain.Implementations;
+namespace UserManagement.Services.Users.Services;
 
 public class UserService : IUserService
 {
@@ -98,7 +97,7 @@ public class UserService : IUserService
 
     public async Task<bool> DeleteUser(int userID, CancellationToken cancellationToken)
     {
-        User? user = await _dataAccess.Get<User>(u => u.Id == userID, cancellationToken);
+        var user = await _dataAccess.Get<User>(u => u.Id == userID, cancellationToken);
         if (user is null)
             return false;
 

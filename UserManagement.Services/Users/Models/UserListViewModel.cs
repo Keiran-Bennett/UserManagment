@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace UserManagement.Web.Models.Users;
+namespace UserManagement.Services.Users.Models;
 
 
 public class UserListViewModel

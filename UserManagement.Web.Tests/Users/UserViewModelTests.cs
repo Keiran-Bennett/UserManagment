@@ -1,17 +1,17 @@
 using System;
 using UserManagement.Models;
-using UserManagement.Web.Models.Users;
+using UserManagement.Services.Users.Models;
 
-namespace UserManagement.Data.Tests;
+namespace UserManagement.Web.Tests.Users;
 
 public class UserViewModelTests
 {
     [Fact]
     public void User_ConvertToViewModel_ShouldHaveSameValues()
     {
-        User user = CreateUser();
+        var user = CreateUser();
 
-        UserDTO userViewModel = (UserDTO)user;
+        var userViewModel = (UserDTO)user;
 
         userViewModel.Id.Should().Be(user.Id);
         userViewModel.Forename.Should().Be(user.Forename);
@@ -19,7 +19,6 @@ public class UserViewModelTests
         userViewModel.Email.Should().Be(user.Email);
         userViewModel.DateOfBirth.Should().Be(user.DateOfBirth);
         userViewModel.IsActive.Should().Be(user.IsActive);
-
     }
 
     private static User CreateUser() =>        

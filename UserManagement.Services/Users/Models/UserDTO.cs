@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using UserManagement.Models;
+using UserManagement.Services.Logs;
 
-namespace UserManagement.Web.Models.Users;
+namespace UserManagement.Services.Users.Models;
 
 public class UserDTO
 {
@@ -28,7 +29,7 @@ public class UserDTO
 
     public static explicit operator User(UserDTO model) => new User
     {
-        Id = (int) model.Id,
+        Id =  model.Id,
         Forename = model.Forename,
         Surname = model.Surname,
         Email = model.Email,

@@ -1,6 +1,6 @@
-﻿namespace UserManagement.Web.Models.Users;
+﻿namespace UserManagement.Services.Users.Models;
 
-public class UserEditViewModel
+public class UserAddViewModel
 {
     public bool IsSuccess { get; set; }
     public UserFormDTO User { get; set; } = new();

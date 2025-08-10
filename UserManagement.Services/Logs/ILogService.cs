@@ -2,10 +2,8 @@
 using System.Threading;
 using System.Threading.Tasks;
 using UserManagement.Models;
-using UserManagement.Services.Models.Users;
-using UserManagement.Web.Models.Users;
 
-namespace UserManagement.Services.Domain.Interfaces;
+namespace UserManagement.Services.Logs;
 
 public interface ILogService
 {

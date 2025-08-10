@@ -1,4 +1,4 @@
-﻿namespace UserManagement.Services.Models.Users;
+﻿namespace UserManagement.Services.Logs;
 
 public enum LogType
 {

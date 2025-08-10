@@ -3,8 +3,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UserManagement.Models;
 using UserManagement.Services;
-using UserManagement.Services.Domain.Interfaces;
-using UserManagement.Web.Models.Users;
+using UserManagement.Services.Users.Models;
+using UserManagement.Services.Users.Services;
 
 namespace UserManagement.WebMS.Controllers;
 

@@ -3,7 +3,7 @@ using System.Threading;
 using System.Threading.Tasks;
 using UserManagement.Models;
 
-namespace UserManagement.Services.Domain.Interfaces;
+namespace UserManagement.Services.Users.Services;
 
 public interface IUserService 
 {

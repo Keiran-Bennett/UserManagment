@@ -6,23 +6,20 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserManagement.Data;
 using UserManagement.Models;
-using UserManagement.Services.Domain.Interfaces;
-using UserManagement.Services.Models.Users;
-using UserManagement.Web.Models.Users;
 
-namespace UserManagement.Services.Domain.Implementations;
+namespace UserManagement.Services.Logs;
 
 public class LogService : ILogService
 {
-    private readonly IDataContext _dataAccess;
-    public LogService(IDataContext dataAccess) => _dataAccess = dataAccess;
+    private readonly IDataContext _dataContext;
+    public LogService(IDataContext dataContext) => _dataContext = dataContext;
 
     public async Task<bool> AddLog(AddLogRequest request, CancellationToken cancellationToken)
     {
         try
         {
             var log = CreateLog(request);
-            await _dataAccess.Create<Log>(log, cancellationToken);
+            await _dataContext.Create(log, cancellationToken);
             return true;
         }
         catch
@@ -63,7 +60,7 @@ public class LogService : ILogService
     {
         if (viewModel.IsFilterEnabled)
         {
-            if ((int)viewModel.Type > 0)
+            if (viewModel.Type > 0)
                 logsQuery = logsQuery.Where(l => l.Type == viewModel.Type);
             if (!string.IsNullOrEmpty(viewModel.SearchTerm))
                 logsQuery = logsQuery.Where(l => l.Details.Contains(viewModel.SearchTerm));
@@ -72,15 +69,14 @@ public class LogService : ILogService
         return logsQuery;
     }
 
-    private IQueryable<Log> GetLogsWithinDatePeriod(LogListViewModel viewModel) => _dataAccess.GetAll<Log>()
+    private IQueryable<Log> GetLogsWithinDatePeriod(LogListViewModel viewModel) => _dataContext.GetAll<Log>()
                    .Where(l => DateOnly.FromDateTime(l.DateofAction) >= viewModel.StartDate & DateOnly.FromDateTime(l.DateofAction) <= viewModel.EndDate).AsQueryable();
 
     public async Task<IEnumerable<Log>> GetAllLogsPerUser(int userID, CancellationToken cancellationToken)
     {
-
         try
         {
-            var logs = await _dataAccess.GetAll<Log>().Where(l => l.UserID == userID).ToListAsync(cancellationToken);
+            var logs = await _dataContext.GetAll<Log>().Where(l => l.UserID == userID).ToListAsync(cancellationToken);
             return logs;
         }
         catch

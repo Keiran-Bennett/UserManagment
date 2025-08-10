@@ -4,13 +4,13 @@ using System.Linq;
 using System.Linq.Expressions;
 using System.Threading;
 using System.Threading.Tasks;
+using UserManagement.Data;
 using UserManagement.Models;
-using UserManagement.Services.Domain.Implementations;
-using UserManagement.Services.Domain.Interfaces;
-using UserManagement.Services.Models.Users;
+using UserManagement.Services.Logs;
 using UserManagement.Services.Tests;
+using UserManagement.Services.Users.Services;
 
-namespace UserManagement.Data.Tests;
+namespace UserManagement.Services.Tests.Users;
 
 
 public class UserServiceTests
@@ -23,7 +23,7 @@ public class UserServiceTests
     {
         Mock<IDataContext> dataContextWithErrors = new();
 
-        dataContextWithErrors.Setup(s => s.GetAll<User>()).Throws(new System.Exception("test exception"));
+        dataContextWithErrors.Setup(s => s.GetAll<User>()).Throws(new Exception("test exception"));
         return new(dataContextWithErrors.Object, _loggerService.Object);
     }
 
@@ -109,7 +109,7 @@ public class UserServiceTests
     public async Task GetUser_Error_RethrowsException()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        _dataContext.Setup(s => s.Get<User>(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>())).Throws(new System.Exception("test exception"));
+        _dataContext.Setup(s => s.Get(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>())).Throws(new Exception("test exception"));
         var service = CreateServiceWithMockedErrors();
 
         // Act: Invokes the method under test with the arranged parameters.
@@ -125,7 +125,7 @@ public class UserServiceTests
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         Mock<IDataContext> dataContext = new();
         dataContext
-            .Setup(s => s.Get<User>(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.Get(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync(new User { Id = 2, Forename = "bob", Surname = "Jones" });
         var service = new UserService(dataContext.Object, _loggerService.Object);
 
@@ -141,7 +141,7 @@ public class UserServiceTests
     public async Task AddUser_Success_CantFindUser_ReturnTrue()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        Mock<IDataContext> dataContext = MockDataContextWithIDMatching();
+        var dataContext = MockDataContextWithIDMatching();
         var mockLogService = new Mock<ILogService>();
         mockLogService.Setup(l => l.AddLog(It.IsAny<AddLogRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
 
@@ -164,7 +164,7 @@ public class UserServiceTests
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         Mock<IDataContext> dataContext = new();
         dataContext
-            .Setup(s => s.Create<User>(It.IsAny<User>(), It.IsAny<CancellationToken>())).Throws(new Exception("Test catch"));
+            .Setup(s => s.Create(It.IsAny<User>(), It.IsAny<CancellationToken>())).Throws(new Exception("Test catch"));
 
         // Act: Invokes the method under test with the arranged parameters.
         var service = new UserService(dataContext.Object, _loggerService.Object);
@@ -180,7 +180,7 @@ public class UserServiceTests
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         Mock<IDataContext> dataContext = new();
         dataContext
-            .Setup(s => s.Get<User>(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
+            .Setup(s => s.Get(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((User)null!);
 
         // Act: Invokes the method under test with the arranged parameters.
@@ -201,7 +201,7 @@ public class UserServiceTests
 
         var result = await service.DeleteUser(5, _defaultCancellationToken);
 
-        dataContext.Verify(s => s.Get<User>(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()));
+        dataContext.Verify(s => s.Get(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()));
         mockLogService.Verify(l => l.AddLog(
             It.Is<AddLogRequest>(r =>
                 r.UserID == 5 &&
@@ -216,7 +216,7 @@ public class UserServiceTests
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         Mock<IDataContext> dataContext = new();
         dataContext
-            .Setup(s => s.Update<User>(It.IsAny<User>(), It.IsAny<CancellationToken>())).Throws(new Exception("Test catch"));
+            .Setup(s => s.Update(It.IsAny<User>(), It.IsAny<CancellationToken>())).Throws(new Exception("Test catch"));
 
         // Act: Invokes the method under test with the arranged parameters.
         var service = new UserService(dataContext.Object, _loggerService.Object);
@@ -251,7 +251,7 @@ public class UserServiceTests
     {
         Mock<IDataContext> dataContext = new();
         dataContext
-      .Setup(s => s.Get<User>(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
+      .Setup(s => s.Get(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
       .ReturnsAsync((Expression<Func<User, bool>> predicate, CancellationToken ct) =>
       {
           var func = predicate.Compile();
