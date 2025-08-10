@@ -12,6 +12,7 @@ using UserManagement.Services.Tests;
 
 namespace UserManagement.Data.Tests;
 
+
 public class UserServiceTests
 {
     private CancellationToken _defaultCancellationToken => new CancellationTokenSource().Token;
@@ -133,7 +134,7 @@ public class UserServiceTests
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeEquivalentTo(new User { Id = 2, Forename = "bob", Surname = "Jones" });
-        _loggerService.Verify(l => l.GetAllLogsPerUser(2), Times.Once);
+        _loggerService.Verify(l => l.GetAllLogsPerUser(2,It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
@@ -152,7 +153,7 @@ public class UserServiceTests
         mockLogService.Verify(l => l.AddLog(
                 It.Is<AddLogRequest>(r =>
                     r.UserID == 5 &&
-                    r.Details == $"bob Jones has been added"
+                    r.Details.Contains($"bob Jones has been added")
             ), It.IsAny<CancellationToken>()), Times.Once);
         result.Should().BeTrue();
     }
@@ -241,7 +242,7 @@ public class UserServiceTests
         mockLogService.Verify(l => l.AddLog(
         It.Is<AddLogRequest>(r =>
             r.UserID == 5 &&
-            r.Details == $"bob Jones has been updated"
+            r.Details.Contains($"bob Jones has been updated")
     ), It.IsAny<CancellationToken>()), Times.Once);
         result.Should().BeTrue();
     }

@@ -17,6 +17,29 @@
             <label for="searchTerm">Description</label>
             <input type="text" id="searchTerm" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search description..." />
         </div>
+                <div class="col">
+            <label for="type">Type</label>
+            <select asp-for="Type" class="form-control"
+                    asp-items="@(new SelectList(new[]
+                            {
+                                new { Value = "", Text = "All" },
+                                new { Value = "1", Text = "Add" },
+                                new { Value = "2", Text = "Delete" },
+                                new { Value = "3", Text = "Update" }
+                            }, "Value", "Text", Model.Type))">
+            </select>
+        </div>
+
+        <div class="col d-flex align-items-center">
+            <div class="form-check mt-4">
+                <input class="form-check-input" type="checkbox" id="isFilterEnabled" name="IsFilterEnabled"
+                       value="true" @(Model.IsFilterEnabled ? "checked" : "") />
+                <label class="form-check-label" for="isFilterEnabled">
+                    Enable Filter
+                </label>
+            </div>
+
+        </div>
         <div class="col d-flex align-items-end mt-3">
             <button type="submit" class="btn btn-primary">Filter</button>
             <a asp-action="List" class="btn btn-secondary ml-2">Clear</a>

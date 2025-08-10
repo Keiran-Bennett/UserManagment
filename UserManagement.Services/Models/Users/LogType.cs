@@ -2,7 +2,7 @@
 
 public enum LogType
 {
-    Add,
-    Delete,
-    Update
+    Add = 1,
+    Delete = 2,
+    Update =3
 }

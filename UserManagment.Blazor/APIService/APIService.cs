@@ -22,22 +22,5 @@ public class ApiService : IApiService
         response.EnsureSuccessStatusCode();
         return await response.Content.ReadFromJsonAsync<TResponse>();
     }
-
-    public async Task<string> PostFormAsync(string endpoint, Dictionary<string, string> formFields)
-    {
-        var content = new FormUrlEncodedContent(formFields);
-        var response = await _http.PostAsync(endpoint, content);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStringAsync();
-    }
-
-    // POST raw string content (e.g., XML, plain text)
-    public async Task<string> PostRawAsync(string endpoint, string content, string mediaType = "text/plain")
-    {
-        var stringContent = new StringContent(content, System.Text.Encoding.UTF8, mediaType);
-        var response = await _http.PostAsync(endpoint, stringContent);
-        response.EnsureSuccessStatusCode();
-        return await response.Content.ReadAsStringAsync();
-    }
 }
 

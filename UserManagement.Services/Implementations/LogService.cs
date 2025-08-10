@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
@@ -7,6 +8,7 @@ using UserManagement.Data;
 using UserManagement.Models;
 using UserManagement.Services.Domain.Interfaces;
 using UserManagement.Services.Models.Users;
+using UserManagement.Web.Models.Users;
 
 namespace UserManagement.Services.Domain.Implementations;
 
@@ -17,19 +19,54 @@ public class LogService : ILogService
 
     public async Task<bool> AddLog(AddLogRequest request, CancellationToken cancellationToken)
     {
-        await Task.Delay(1);
-        return true;
+        try
+        {
+            var log = CreateLog(request);
+            await _dataAccess.Create<Log>(log, cancellationToken);
+            return true;
+        }
+        catch
+        {
+            return false;
+        }
     }
 
-    public async Task<IEnumerable<Log>> GetAllLogs(CancellationToken token)
+    private static Log CreateLog(AddLogRequest request) => new Log
     {
-        await Task.Delay(1);
-        return new List<Log>();
+        Details = request.Details,
+        DateofAction = request.DateOfAction,
+        Type = (int)request.logType,
+        UserID = request.UserID
+    };
+
+    public async Task<IEnumerable<Log>> GetLogs(LogListViewModel viewModel, CancellationToken cancellationToken)
+    {
+        try
+        {
+            var logs = await _dataAccess.GetAll<Log>()
+              //  .Where(l => DateOnly.FromDateTime(l.DateofAction) >= viewModel.StartDate & DateOnly.FromDateTime(l.DateofAction) <= viewModel.EndDate)
+               .Where(l => viewModel.IsFilterEnabled & l.Type == viewModel.Type)
+               .Where(l => viewModel.IsFilterEnabled & viewModel.SearchTerm != string.Empty & l.Details.Contains(viewModel.SearchTerm))
+                .ToListAsync();
+            return logs;
+        }
+        catch
+        {
+            return new List<Log>();
+        }
     }
 
-    public async Task<IEnumerable<Log>> GetAllLogsPerUser(int userID)
+    public async Task<IEnumerable<Log>> GetAllLogsPerUser(int userID, CancellationToken cancellationToken)
     {
-        await Task.Delay(1);
-        return new List<Log>();
+
+        try
+        {
+            var logs = await _dataAccess.GetAll<Log>().Where(l => l.UserID == userID).ToListAsync(cancellationToken);
+            return logs;
+        }
+        catch
+        {
+            return new List<Log>();
+        }
     }
 }

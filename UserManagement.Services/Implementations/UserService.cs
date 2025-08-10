@@ -74,7 +74,7 @@ public class UserService : IUserService
         var user = await _dataAccess.Get<User>(u => u.Id == userID,cancellationToken);
         if (user != null)
         {
-            var logs = await _logService.GetAllLogsPerUser(user.Id);
+            var logs = await _logService.GetAllLogsPerUser(user.Id,cancellationToken);
             user.Logs = logs.ToList();
         }
 
@@ -113,7 +113,7 @@ public class UserService : IUserService
         try
         {
             await _dataAccess.Create(user, cancellationToken);
-            var logAddNewUserRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been added" };
+            var logAddNewUserRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been added with {JsonSerializer.Serialize(user)}" };
             await LogAction(logAddNewUserRequest, cancellationToken);
             return true;
         }

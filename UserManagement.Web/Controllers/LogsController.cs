@@ -16,15 +16,15 @@ public class LogsController : Controller
     }
 
     [HttpGet]
-    public async Task<ViewResult> List(LogListViewModel viewmodel, CancellationToken cancellationToken)
+    public async Task<ViewResult> List(LogListViewModel viewModel, CancellationToken cancellationToken)
     {
-        LogListViewModel viewModel = await CreateLogsListViewModel(cancellationToken);
-        return View(viewModel);
+        LogListViewModel model = await CreateLogsListViewModel(viewModel,cancellationToken);
+        return View(model);
     }
 
-    private async Task<LogListViewModel> CreateLogsListViewModel(CancellationToken token)
+    private async Task<LogListViewModel> CreateLogsListViewModel(LogListViewModel viewModel,CancellationToken token)
     {
-        var logs = await _logService.GetAllLogs(token);
+        var logs = await _logService.GetLogs(viewModel,token);
         var model = new LogListViewModel() { Logs = logs.Select(l => (LogDTO)l).ToList() };
         return model;
     }
