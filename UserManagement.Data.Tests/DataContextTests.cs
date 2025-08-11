@@ -14,7 +14,7 @@ public class DataContextTests
     public async Task GetEntity_WhenMatchesPredicate_UserShouldMatchOneInDB()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var dataContext = CreateDataContext("1");
+        var dataContext = CreateNamedDataContext("1");
         // Act: Invokes the method under test with the arranged parameters.
         User? entity = await dataContext.Get<User>(u => u.Forename == "Robin", _defaultCancellationToken);
 
@@ -28,7 +28,7 @@ public class DataContextTests
     public async Task GetEntity_WhenDoesNotMatchPredicate_UserShouldBeNull()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var dataContext = CreateDataContext("2");
+        var dataContext = CreateNamedDataContext("2");
 
         // Act: Invokes the method under test with the arranged parameters.
         User? entity = await dataContext.Get<User>(u => u.Forename == "Robin2134", _defaultCancellationToken);
@@ -41,7 +41,7 @@ public class DataContextTests
     public async Task GetAllEntity_ShouldReturnAllUsers()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var dataContext = CreateDataContext("3");
+        var dataContext = CreateNamedDataContext("3");
 
         // Act: Invokes the method under test with the arranged parameters.
         List<User> entity = await dataContext.GetAll<User>().ToListAsync(_defaultCancellationToken);
@@ -54,7 +54,7 @@ public class DataContextTests
     public async Task DeleteEntity_EntityShouldNotBeInList()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var dataContext = CreateDataContext("4");
+        var dataContext = CreateNamedDataContext("4");
 
         // Act: Invokes the method under test with the arranged parameters.
         User? deletedUser = await dataContext.Get<User>(u => u.Id == 1, _defaultCancellationToken);
@@ -63,9 +63,9 @@ public class DataContextTests
         // Assert: Verifies that the action of the method under test behaves as expected.
         if (dataContext is DataContext dc)
         {
-            List<User> testUsers = CreateTestUsers();
-            testUsers.RemoveAt(0);
-            dc.Users.Should().BeEquivalentTo(testUsers);
+            List<User> expectedResult = CreateTestUsers();
+            expectedResult.RemoveAt(0);
+            dc.Users.Should().BeEquivalentTo(expectedResult);
         }
     }
 
@@ -73,11 +73,11 @@ public class DataContextTests
     public async Task UpdateEntity_EntityHasUpdatedValues()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var dataContext = CreateDataContext("5");
+        var dataContext = CreateNamedDataContext("5");
 
+        // Act: Invokes the method under test with the arranged parameters.
         User user = await dataContext.Get<User>(u => u.Id == 1, _defaultCancellationToken) ?? new User();
         user.Email = "testupdate";
-        // Act: Invokes the method under test with the arranged parameters.
         await dataContext.Update(user, _defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
@@ -87,7 +87,7 @@ public class DataContextTests
 
     }
 
-    private IDataContext CreateDataContext(string name)
+    private IDataContext CreateNamedDataContext(string name)
     {
         var options = new DbContextOptionsBuilder<DataContext>()
         .UseInMemoryDatabase(databaseName: name)

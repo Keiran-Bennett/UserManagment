@@ -6,7 +6,6 @@ using System.Threading.Tasks;
 using UserManagement.Data;
 using UserManagement.Models;
 using UserManagement.Services.Logs;
-using UserManagement.Services.Tests;
 
 namespace UserManagement.Services.Tests.Logs;
 
@@ -28,6 +27,22 @@ public class LogServiceTests
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeFalse();
     }
+
+    [Fact]
+    public async Task LogService_AddLog_Success_ReturnTrue()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        Mock<IDataContext> dataContextMock = new();
+        dataContextMock.Setup(s => s.Create(It.IsAny<Log>(), It.IsAny<CancellationToken>())).Returns(Task.CompletedTask);
+        LogService logService = new(dataContextMock.Object);
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await logService.AddLog(new AddLogRequest { UserID = 1, DateOfAction = DateTime.Today, Details = "New User Added", logType = LogType.Add }, _defaultCancellationToken);
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        result.Should().BeTrue();
+    }
+
     [Fact]
     public async Task LogService_GetUserLogs_Success_ReturnWith3InList()
     {
@@ -120,6 +135,22 @@ public class LogServiceTests
     }
 
     [Fact]
+    public async Task LogService_GetAllLogs_ActiionTypeIsZero_Success_ReturnAllLogs()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        Mock<IDataContext> dataContextMock = new();
+        dataContextMock.Setup(d => d.GetAll<Log>()).Returns(new TestAsyncEnumerable<Log>(CreateLogs().AsEnumerable()));
+        LogService logService = new(dataContextMock.Object);
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await logService.GetLogs(new() { Type = 0, IsFilterEnabled = true }, _defaultCancellationToken);
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        result.Count().Should().Be(5);
+    }
+
+
+    [Fact]
     public async Task LogService_GetAllLogs_Success_ReturnListOfLogsWithSearchTerm()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
@@ -132,6 +163,21 @@ public class LogServiceTests
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Count().Should().Be(1);
+    }
+
+    [Fact]
+    public async Task LogService_GetAllLogs_SearchTemIsNull_Success_ReturnListAllLogs()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        Mock<IDataContext> dataContextMock = new();
+        dataContextMock.Setup(d => d.GetAll<Log>()).Returns(new TestAsyncEnumerable<Log>(CreateLogs().AsEnumerable()));
+        LogService logService = new(dataContextMock.Object);
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await logService.GetLogs(new() { IsFilterEnabled = true }, _defaultCancellationToken);
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
+        result.Count().Should().Be(5);
     }
 
     private static List<Log> CreateLogs() => new List<Log>

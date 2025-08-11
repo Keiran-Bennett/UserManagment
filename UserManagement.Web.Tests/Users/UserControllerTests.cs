@@ -13,15 +13,10 @@ public class UserControllerTests
 {
     private readonly Mock<IUserService> _userService = new();
     private CancellationToken _defaultCancellationToken => new CancellationTokenSource().Token;
-    private UsersController CreateListUsersController()
-    {
-        var controller = new UsersController(_userService.Object);
-        return controller;
-    }
 
 
     [Fact]
-    public async Task List_NoTypePassedInShouldReturnAllUsers_InUserLisViewModel()
+    public async Task List_NoTypePassedIn_ShouldCallGetAll()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = CreateListUsersController();
@@ -35,10 +30,8 @@ public class UserControllerTests
         .Which.Model.Should().BeOfType<UserListViewModel>();
     }
 
-
-
     [Fact]
-    public async Task List_ActiveUsersPassedInShouldReturnOneUser_InUserLisViewModel()
+    public async Task List_ActiveUsersPassedIn_ShouldGetActiveUsers()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = CreateListUsersController();
@@ -53,7 +46,7 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task List_InActiveUsersPassedInShouldReturnOneUser_InUserLisViewModel()
+    public async Task List_InActiveUsersPassedIn_ShouldReturnInActiveUsers()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = CreateListUsersController();
@@ -67,14 +60,20 @@ public class UserControllerTests
       .Which.Model.Should().BeOfType<UserListViewModel>();
     }
 
+    private UsersController CreateListUsersController()
+    {
+        var controller = new UsersController(_userService.Object);
+        return controller;
+    }
+
+
     [Fact]
-    public async Task View_GetUser_MappedTheUserToViewModel_RazorPage_ViewModelShouldEqualUser()
+    public async Task View_GetUser_MappedTheUserToViewModel_ViewModelShouldEqualUser()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var returnUser = new User { Forename = "test", Surname = "test" };
         _userService.Setup(us => us.GetUser(1, It.IsAny<CancellationToken>())).ReturnsAsync(returnUser);
         var controller = new UsersController(_userService.Object);
-
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await controller.View(1, _defaultCancellationToken);
@@ -88,12 +87,11 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task Delete_GetUser_UserIsNull_Razor_ReturnViewModel_IsSuccessIsFalse()
+    public async Task Delete_GetUser_UserIsNull_ReturnViewModel_IsSuccessIsFalse()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         _userService.Setup(us => us.GetUser(1, It.IsAny<CancellationToken>())).ReturnsAsync((User)null!);
         var controller = new UsersController(_userService.Object);
-
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await controller.Delete(1, _defaultCancellationToken);
@@ -112,7 +110,6 @@ public class UserControllerTests
         var returnUser = new User { Id = 1, Forename = "Peter", Surname = "Loew", Email = "ploew@example.com", IsActive = true, DateOfBirth = new System.DateOnly(2010, 2, 25) };
         _userService.Setup(us => us.GetUser(1, It.IsAny<CancellationToken>())).ReturnsAsync(returnUser);
         var controller = new UsersController(_userService.Object);
-
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await controller.Delete(1, _defaultCancellationToken);
@@ -141,7 +138,7 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task ConfirmDelete_UserDelete_Razor_Failure_ReturnmodelWithSuccessFlag()
+    public async Task ConfirmDelete_UserDelete_Failure_ReturnModelWithSuccessFlag()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         _userService.Setup(us => us.DeleteUser(1, It.IsAny<CancellationToken>())).ReturnsAsync(false);
@@ -159,7 +156,7 @@ public class UserControllerTests
 
 
     [Fact]
-    public void Add_Razor_ReturnViewModel_IsSuccessIsTrue()
+    public void Add_ReturnViewModel_IsSuccessIsTrue()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = new UsersController(_userService.Object);
@@ -174,7 +171,7 @@ public class UserControllerTests
     }
 
     [Fact]
-    public async Task ConfirmAdd_Razor_ReturnViewModel_IsRedirectResukt()
+    public async Task ConfirmAdd_ReturnViewModel_IsRedirectResukt()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         Mock<IUserService> userService = new();
@@ -184,14 +181,13 @@ public class UserControllerTests
         // Act: Invokes the method under test with the arranged parameters.
         var result = await controller.ConfirmAdd(new(), _defaultCancellationToken);
 
-        // Assert: Verifies that the action of
-        // the method under test behaves as expected.
+        // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeOfType<RedirectToActionResult>();
     }
 
 
     [Fact]
-    public async Task ConfirmAdd_Razor_InvalidModel_IsRedirectResult()
+    public async Task ConfirmAdd_InvalidModel_IsRedirectResult()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = new UsersController(_userService.Object);
@@ -199,6 +195,7 @@ public class UserControllerTests
         // Act: Invokes the method under test with the arranged parameters.
         var result = await controller.ConfirmAdd(CreateAddModel(), _defaultCancellationToken);
 
+        // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeOfType<RedirectToActionResult>();
     }
 
@@ -213,6 +210,7 @@ public class UserControllerTests
         // Act: Invokes the method under test with the arranged parameters.
         var result = await controller.ConfirmAdd(CreateAddModel(), _defaultCancellationToken);
 
+        // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeOfType<RedirectToActionResult>();
     }
 

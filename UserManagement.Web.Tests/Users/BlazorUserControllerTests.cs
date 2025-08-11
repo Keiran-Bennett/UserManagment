@@ -14,7 +14,7 @@ public class BlazorUserControllerTests
     private CancellationToken _defaultCancellationToken => new CancellationTokenSource().Token;
 
     [Fact]
-    public async Task List_DefaultPassedInShouldReturnAllUsers_InUserLisViewModel()
+    public async Task List_DefaultPassedInShouldReturnAllUsers()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         BlazorUsersController controller = new(_userService.Object);
@@ -29,7 +29,7 @@ public class BlazorUserControllerTests
     }
 
     [Fact]
-    public async Task List_NoTypePassedInShouldReturnAllUsers_InUserLisViewModel()
+    public async Task List_NoTypePassedInShould_CallAllUsers()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = new BlazorUsersController(_userService.Object);
@@ -44,7 +44,7 @@ public class BlazorUserControllerTests
     }
 
     [Fact]
-    public async Task List_ActiveUsersPassedInShouldReturnOneUser_InUserLisViewModel()
+    public async Task List_ActiveUsersPassedInShouldCall_GetActiveUsers()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = new BlazorUsersController(_userService.Object);
@@ -59,7 +59,7 @@ public class BlazorUserControllerTests
     }
 
     [Fact]
-    public async Task List_InActiveUsersPassedInShouldReturnOneUser_InUserLisViewModel()
+    public async Task List_InActiveUsersPassedInShouldReturnOneUser_CallInactiveUsers()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = new BlazorUsersController(_userService.Object);
@@ -75,7 +75,7 @@ public class BlazorUserControllerTests
 
 
     [Fact]
-    public async Task Delete_GetUser_UserIsNull_Blazor_ReturnViewModel_IsSuccessIsFalse()
+    public async Task Delete_GetUser_UserIsNull_ReturnViewModel_IsSuccessIsFalse()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         _userService.Setup(us => us.GetUser(1, It.IsAny<CancellationToken>())).ReturnsAsync((User)null!);
@@ -93,7 +93,7 @@ public class BlazorUserControllerTests
 
 
     [Fact]
-    public async Task ConfirmDelete_UserDelete_Blazor_Failure_ReturnmodelWithSuccessFlag()
+    public async Task ConfirmDelete_UserDelete_Failure_ReturnmodelWithSuccessFlag()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         _userService.Setup(us => us.DeleteUser(1, It.IsAny<CancellationToken>())).ReturnsAsync(false);
@@ -110,10 +110,9 @@ public class BlazorUserControllerTests
     }
 
     [Fact]
-    public async Task Delete_GetUser_UserIsPopulated_Blazor_ReturnViewModel_IsSuccessIsFalse()
+    public async Task Delete_GetUser_UserIsPopulate_ReturnViewModel_IsSuccessIsFalse()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-
         var returnUser = new User { Id = 1, Forename = "Peter", Surname = "Loew", Email = "ploew@example.com", IsActive = true, DateOfBirth = new System.DateOnly(2010, 2, 25) };
         _userService.Setup(us => us.GetUser(1, It.IsAny<CancellationToken>())).ReturnsAsync(returnUser);
         var controller = new BlazorUsersController(_userService.Object);
@@ -149,7 +148,7 @@ public class BlazorUserControllerTests
     }
 
     [Fact]
-    public async Task ConfirmDelete_UserDelete_Blazor_Success_ReturnmodelWithSuccessFlag()
+    public async Task ConfirmDelete_UserDelete_Success_ReturnmodelWithSuccessFlag()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         _userService.Setup(us => us.DeleteUser(1, It.IsAny<CancellationToken>())).ReturnsAsync(true);
@@ -166,7 +165,7 @@ public class BlazorUserControllerTests
     }
 
     [Fact]
-    public async Task ConfirmAdd_Blazor_ReturnViewModel_IsSuccessIsTrue()
+    public async Task ConfirmAdd_ReturnViewModel_IsSuccessIsTrue()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var controller = CreateAddUserControllerWithSuccess();

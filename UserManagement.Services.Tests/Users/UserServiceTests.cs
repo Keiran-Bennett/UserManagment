@@ -7,7 +7,6 @@ using System.Threading.Tasks;
 using UserManagement.Data;
 using UserManagement.Models;
 using UserManagement.Services.Logs;
-using UserManagement.Services.Tests;
 using UserManagement.Services.Users.Services;
 
 namespace UserManagement.Services.Tests.Users;
@@ -18,20 +17,12 @@ public class UserServiceTests
     private CancellationToken _defaultCancellationToken => new CancellationTokenSource().Token;
     private Mock<IDataContext> _dataContext => SetupActiveUsersDataModels();
     private readonly Mock<ILogService> _loggerService = new();
-    private UserService CreateService() => new(_dataContext.Object, _loggerService.Object);
-    private UserService CreateServiceWithMockedErrors()
-    {
-        Mock<IDataContext> dataContextWithErrors = new();
-
-        dataContextWithErrors.Setup(s => s.GetAll<User>()).Throws(new Exception("test exception"));
-        return new(dataContextWithErrors.Object, _loggerService.Object);
-    }
 
     [Fact]
     public async Task GetAll_WhenContextReturnsEntities_MustReturnSameEntities()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var service = CreateService();
+        var service = CreateStandardService();
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await service.GetAll(_defaultCancellationToken);
@@ -48,6 +39,7 @@ public class UserServiceTests
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await service.GetAll(_defaultCancellationToken);
+
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeEquivalentTo(new List<User> { });
     }
@@ -56,13 +48,14 @@ public class UserServiceTests
     public async Task GetActiveUsers_WhenContextReturnsEntities_MustReturnSameEntities()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var service = CreateService();
+        var service = CreateStandardService();
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await service.GetActiveUsers(_defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
-        result.Should().BeEquivalentTo(CreateUsers().Where(u => u.IsActive).ToList());
+        List<User> activeUsers = CreateUsers().Where(u => u.IsActive).ToList();
+        result.Should().BeEquivalentTo(activeUsers);
     }
 
     [Fact]
@@ -82,13 +75,14 @@ public class UserServiceTests
     public async Task GetInActiveUsers_WhenContextReturnsEntities_MustReturnSameEntities()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        var service = CreateService();
+        var service = CreateStandardService();
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await service.GetInActiveUsers(_defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
-        result.Should().BeEquivalentTo(CreateUsers().Where(u => !u.IsActive).ToList());
+        List<User> inActiveUsers = CreateUsers().Where(u => !u.IsActive).ToList();
+        result.Should().BeEquivalentTo(inActiveUsers);
     }
 
 
@@ -106,10 +100,9 @@ public class UserServiceTests
     }
 
     [Fact]
-    public async Task GetUser_Error_RethrowsException()
+    public async Task GetUser_Error_ThrrowsException()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        _dataContext.Setup(s => s.Get(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>())).Throws(new Exception("test exception"));
         var service = CreateServiceWithMockedErrors();
 
         // Act: Invokes the method under test with the arranged parameters.
@@ -134,11 +127,11 @@ public class UserServiceTests
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeEquivalentTo(new User { Id = 2, Forename = "bob", Surname = "Jones" });
-        _loggerService.Verify(l => l.GetAllLogsPerUser(2,It.IsAny<CancellationToken>()), Times.Once);
+        _loggerService.Verify(l => l.GetAllLogsPerUser(2, It.IsAny<CancellationToken>()), Times.Once);
     }
 
     [Fact]
-    public async Task AddUser_Success_CantFindUser_ReturnTrue()
+    public async Task AddUser_Success_ReturnTrueAndLogEntry()
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var dataContext = MockDataContextWithIDMatching();
@@ -153,8 +146,8 @@ public class UserServiceTests
         mockLogService.Verify(l => l.AddLog(
                 It.Is<AddLogRequest>(r =>
                     r.UserID == 5 &&
-                    r.Details.Contains($"bob Jones has been added")
-            ), It.IsAny<CancellationToken>()), Times.Once);
+                    r.Details.Contains($"bob Jones has been added")),
+                It.IsAny<CancellationToken>()), Times.Once);
         result.Should().BeTrue();
     }
 
@@ -205,8 +198,8 @@ public class UserServiceTests
         mockLogService.Verify(l => l.AddLog(
             It.Is<AddLogRequest>(r =>
                 r.UserID == 5 &&
-                r.Details == $"bob Jones has been deleted"
-    ), It.IsAny<CancellationToken>()), Times.Once);
+                r.Details == $"bob Jones has been deleted"),
+            It.IsAny<CancellationToken>()), Times.Once);
         result.Should().BeTrue();
     }
 
@@ -242,9 +235,18 @@ public class UserServiceTests
         mockLogService.Verify(l => l.AddLog(
         It.Is<AddLogRequest>(r =>
             r.UserID == 5 &&
-            r.Details.Contains($"bob Jones has been updated")
-    ), It.IsAny<CancellationToken>()), Times.Once);
+            r.Details.Contains($"bob Jones has been updated")),
+        It.IsAny<CancellationToken>()), Times.Once);
         result.Should().BeTrue();
+    }
+
+    private UserService CreateStandardService() => new(_dataContext.Object, _loggerService.Object);
+    private UserService CreateServiceWithMockedErrors()
+    {
+        Mock<IDataContext> dataContextWithErrors = new();
+
+        dataContextWithErrors.Setup(s => s.GetAll<User>()).Throws(new Exception("test exception"));
+        return new(dataContextWithErrors.Object, _loggerService.Object);
     }
 
     private static Mock<IDataContext> MockDataContextWithIDMatching()
@@ -303,7 +305,5 @@ public class UserServiceTests
                 IsActive = false,
             }
             }.AsQueryable();
-
-
 
 }
