@@ -1,7 +1,8 @@
 ﻿using System.Linq;
 using System.Threading;
 using System.Threading.Tasks;
-using UserManagement.Services.Logs;
+using UserManagement.Services.Logs.Models;
+using UserManagement.Services.Logs.Services;
 
 namespace UserManagement.WebMS.Controllers;
 

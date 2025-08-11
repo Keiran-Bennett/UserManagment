@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using UserManagement.Models;
-using UserManagement.Services.Logs;
+using UserManagement.Services.Logs.Models;
 
 namespace UserManagement.Services.Users.Models;
 

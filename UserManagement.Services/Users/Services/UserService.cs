@@ -6,24 +6,25 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserManagement.Data;
 using UserManagement.Models;
-using UserManagement.Services.Logs;
+using UserManagement.Services.Logs.Models;
+using UserManagement.Services.Logs.Services;
 
 namespace UserManagement.Services.Users.Services;
 
 public class UserService : IUserService
 {
-    private readonly IDataContext _dataAccess;
+    private readonly IDataContext _dataContext;
     private readonly ILogService _logService;
-    public UserService(IDataContext dataAccess, ILogService logService)
+    public UserService(IDataContext dataContext, ILogService logService)
     {
-        _dataAccess = dataAccess;
+        _dataContext = dataContext;
         _logService = logService;
     }
     public async Task<IEnumerable<User>> GetAll(CancellationToken cancellationToken)
     {
         try
         {
-            return await _dataAccess.GetAll<User>().ToListAsync(cancellationToken);
+            return await _dataContext.GetAll<User>().ToListAsync(cancellationToken);
         }
         catch
         {
@@ -31,12 +32,11 @@ public class UserService : IUserService
         }
     }
 
-
     public async Task<IEnumerable<User>> GetActiveUsers(CancellationToken cancellationToken)
     {
         try
         {
-            return await _dataAccess.GetAll<User>().Where(u => u.IsActive).ToListAsync(cancellationToken);
+            return await _dataContext.GetAll<User>().Where(u => u.IsActive).ToListAsync(cancellationToken);
         }
         catch
         {
@@ -48,7 +48,7 @@ public class UserService : IUserService
     {
         try
         {
-            return await _dataAccess.GetAll<User>().Where(u => !u.IsActive).ToListAsync(cancellationToken);
+            return await _dataContext.GetAll<User>().Where(u => !u.IsActive).ToListAsync(cancellationToken);
         }
         catch
         {
@@ -70,7 +70,7 @@ public class UserService : IUserService
     
     private async Task<User?> GetUserWithLogs(int userID, CancellationToken cancellationToken)
     {
-        var user = await _dataAccess.Get<User>(u => u.Id == userID,cancellationToken);
+        var user = await _dataContext.Get<User>(u => u.Id == userID,cancellationToken);
         if (user != null)
         {
             var logs = await _logService.GetAllLogsPerUser(user.Id,cancellationToken);
@@ -84,8 +84,8 @@ public class UserService : IUserService
     {
         try
         {
-            await _dataAccess.Update(user, cancellationToken);
-            var editUserLogRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been updated to {JsonSerializer.Serialize(user)}", logType = LogType.Update };
+            await _dataContext.Update(user, cancellationToken);
+            var editUserLogRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been updated", logType = LogType.Update, JSONSnapShot = JsonSerializer.Serialize((LogUserDTO)user) };
             await LogAction(editUserLogRequest, cancellationToken);
             return true;
         }
@@ -97,12 +97,12 @@ public class UserService : IUserService
 
     public async Task<bool> DeleteUser(int userID, CancellationToken cancellationToken)
     {
-        var user = await _dataAccess.Get<User>(u => u.Id == userID, cancellationToken);
+        var user = await _dataContext.Get<User>(u => u.Id == userID, cancellationToken);
         if (user is null)
             return false;
 
-        await _dataAccess.Delete(user, cancellationToken);
-        var logDeleteRequest = new AddLogRequest { UserID = userID, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been deleted", logType = LogType.Delete};
+        await _dataContext.Delete(user, cancellationToken);
+        var logDeleteRequest = new AddLogRequest { UserID = userID, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been deleted", logType = LogType.Delete, JSONSnapShot = JsonSerializer.Serialize((LogUserDTO)user) };
         await LogAction(logDeleteRequest, cancellationToken);
         return true;
     }
@@ -111,8 +111,8 @@ public class UserService : IUserService
     {
         try
         {
-            await _dataAccess.Create(user, cancellationToken);
-            var logAddNewUserRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been added with {JsonSerializer.Serialize(user)}", logType = LogType.Add };
+            await _dataContext.Create(user, cancellationToken);
+            var logAddNewUserRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been added", logType = LogType.Add, JSONSnapShot = JsonSerializer.Serialize((LogUserDTO)user) };
             await LogAction(logAddNewUserRequest, cancellationToken);
             return true;
         }

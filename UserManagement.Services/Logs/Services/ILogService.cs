@@ -2,8 +2,9 @@
 using System.Threading;
 using System.Threading.Tasks;
 using UserManagement.Models;
+using UserManagement.Services.Logs.Models;
 
-namespace UserManagement.Services.Logs;
+namespace UserManagement.Services.Logs.Services;
 
 public interface ILogService
 {

@@ -1,5 +1,6 @@
 ﻿@using UserManagement.Services
 @using UserManagement.Services.Logs
+@using UserManagement.Services.Logs.Models
 @model LogListViewModel
 
 <h2>User List</h2>
@@ -18,16 +19,16 @@
             <label for="searchTerm">Description</label>
             <input type="text" id="searchTerm" name="searchTerm" value="@Model.SearchTerm" class="form-control" placeholder="Search description..." />
         </div>
-                <div class="col-6">
+        <div class="col-6">
             <label for="type">Type</label>
             <select asp-for="Type" class="form-control"
                     asp-items="@(new SelectList(new[]
-                            {
-                                new { Value = "", Text = "All" },
-                                new { Value = "1", Text = "Add" },
-                                new { Value = "2", Text = "Delete" },
-                                new { Value = "3", Text = "Update" }
-                            }, "Value", "Text", Model.Type))">
+                                                {
+                                                    new { Value = "", Text = "All" },
+                                                    new { Value = "1", Text = "Add" },
+                                                    new { Value = "2", Text = "Delete" },
+                                                    new { Value = "3", Text = "Update" }
+                                                }, "Value", "Text", Model.Type))">
             </select>
         </div>
 
@@ -52,27 +53,36 @@
     <table class="table table-striped">
         <thead>
             <tr>
-                <th>Id</th>
                 <th>DateTime</th>
                 <th>Type</th>
-                <th>Description</th>
+                <th>Actions</th>
             </tr>
         </thead>
         <tbody>
-            @foreach (var user in Model.Logs)
+            @foreach (var log in Model.Logs)
             {
                 <tr>
                     <td>
-                        @user.Id
+                        @log.DateofAction
                     </td>
                     <td>
-                        @user.DateofAction
+                        @log.LogType
                     </td>
                     <td>
-                        @user.logType
-                    </td>
-                    <td>
-                        @user.Details
+                        <button type="button"
+                                class="btn btn-secondary"
+                                data-bs-toggle="modal"
+                                data-bs-target="#logModal"
+                                data-log-date="@log.DateofAction.ToString("dd-MM-yyyy HH:mm")"
+                                data-log-details="@log.Details"
+                                data-log-type="@log.LogType"
+                                data-user-forename="@log.Snapshot.Forename"
+                                data-user-surname="@log.Snapshot.Surname"
+                                data-user-email="@log.Snapshot.Email"
+                                data-user-dob="@log.Snapshot.DateOfBirth"
+                                data-user-active="@log.Snapshot.IsActive">
+                            View Details
+                        </button>
                     </td>
                 </tr>
             }
@@ -80,4 +90,36 @@
     </table>
 </div>
 
+<div class="modal fade" id="logModal" tabindex="-1" aria-labelledby="logModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logModalLabel">Log Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Log Info</h6>
+                <p><strong>Date:</strong> <span id="modalLogDate"></span></p>
+
+                <p><strong>Type:</strong> <span id="modalLogType"></span></p>
+                <p><strong>Details:</strong> <span id="modalLogDetails"></span></p>
+
+                <hr />
+                <h6>User Snapshot</h6>
+                <p><strong>Forename:</strong> <span id="modalUserForename"></span></p>
+                <p><strong>Surname:</strong> <span id="modalUserSurname"></span></p>
+                <p><strong>Email:</strong> <span id="modalUserEmail"></span></p>
+                <p><strong>Date of Birth:</strong> <span id="modalUserDob"></span></p>
+                <p><strong>Active:</strong> <span id="modalUserActive"></span></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/js/Modal.js"></script>
+}
 

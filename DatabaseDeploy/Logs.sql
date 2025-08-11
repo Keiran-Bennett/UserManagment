@@ -4,5 +4,6 @@
     [UserID] INT NOT NULL,
     [DateofAction] DATETIME NOT NULL,
     [Details] NVARCHAR(MAX) NOT NULL, 
-    [Type] INT NOT NULL
+    [Type] INT NOT NULL, 
+    [Snapshot] NVARCHAR(MAX) NOT NULL 
 )

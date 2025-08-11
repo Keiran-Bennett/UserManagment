@@ -61,4 +61,7 @@
     <Build Include="Users.sql" />
     <Build Include="Logs.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <RefactorLog Include="DatabaseDeploy.refactorlog" />
+  </ItemGroup>
 </Project>

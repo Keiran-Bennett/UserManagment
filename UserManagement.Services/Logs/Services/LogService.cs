@@ -6,8 +6,9 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using UserManagement.Data;
 using UserManagement.Models;
+using UserManagement.Services.Logs.Models;
 
-namespace UserManagement.Services.Logs;
+namespace UserManagement.Services.Logs.Services;
 
 public class LogService : ILogService
 {
@@ -33,7 +34,8 @@ public class LogService : ILogService
         Details = request.Details,
         DateofAction = request.DateOfAction,
         Type = (int)request.logType,
-        UserID = request.UserID
+        UserID = request.UserID,
+        SnapShot = request.JSONSnapShot
     };
 
     public async Task<IEnumerable<Log>> GetLogs(LogListViewModel viewModel, CancellationToken cancellationToken)
@@ -56,6 +58,10 @@ public class LogService : ILogService
         return logsQuery;
     }
 
+    private IQueryable<Log> GetLogsWithinDatePeriod(LogListViewModel viewModel) => _dataContext.GetAll<Log>()
+               .Where(l => DateOnly.FromDateTime(l.DateofAction) >= viewModel.StartDate &
+               DateOnly.FromDateTime(l.DateofAction) <= viewModel.EndDate).AsQueryable();
+
     private static IQueryable<Log> ApplySpecificFilters(LogListViewModel viewModel, IQueryable<Log> logsQuery)
     {
         if (viewModel.IsFilterEnabled)
@@ -68,9 +74,6 @@ public class LogService : ILogService
 
         return logsQuery;
     }
-
-    private IQueryable<Log> GetLogsWithinDatePeriod(LogListViewModel viewModel) => _dataContext.GetAll<Log>()
-                   .Where(l => DateOnly.FromDateTime(l.DateofAction) >= viewModel.StartDate & DateOnly.FromDateTime(l.DateofAction) <= viewModel.EndDate).AsQueryable();
 
     public async Task<IEnumerable<Log>> GetAllLogsPerUser(int userID, CancellationToken cancellationToken)
     {

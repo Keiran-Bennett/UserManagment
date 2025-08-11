@@ -2,11 +2,13 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Linq.Expressions;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using UserManagement.Data;
 using UserManagement.Models;
-using UserManagement.Services.Logs;
+using UserManagement.Services.Logs.Models;
+using UserManagement.Services.Logs.Services;
 using UserManagement.Services.Users.Services;
 
 namespace UserManagement.Services.Tests.Users;
@@ -141,12 +143,15 @@ public class UserServiceTests
         // Act: Invokes the method under test with the arranged parameters.
         var service = new UserService(dataContext.Object, mockLogService.Object);
 
+        var addedUser = new User { Id = 5, Forename = "bob", Surname = "Jones" };
+        string expectedJSON = JsonSerializer.Serialize((LogUserDTO)addedUser);
         // Assert: Verifies that the action of the method under test behaves as expected.
-        var result = await service.AddUser(new User { Id = 5, Forename = "bob", Surname = "Jones" }, _defaultCancellationToken);
+        var result = await service.AddUser(addedUser, _defaultCancellationToken);
         mockLogService.Verify(l => l.AddLog(
                 It.Is<AddLogRequest>(r =>
                     r.UserID == 5 &&
-                    r.Details.Contains($"bob Jones has been added")),
+                    r.Details.Contains($"bob Jones has been added") &&
+                    r.JSONSnapShot ==  expectedJSON),
                 It.IsAny<CancellationToken>()), Times.Once);
         result.Should().BeTrue();
     }
@@ -226,16 +231,19 @@ public class UserServiceTests
         var mockLogService = new Mock<ILogService>();
         mockLogService.Setup(l => l.AddLog(It.IsAny<AddLogRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
         var dataContext = MockDataContextWithIDMatching();
+        var service = new UserService(dataContext.Object, mockLogService.Object);
+        var editedUser = new User { Id = 5, Forename = "bob", Surname = "Jones" };
 
         // Act: Invokes the method under test with the arranged parameters.
-        var service = new UserService(dataContext.Object, mockLogService.Object);
+        string expectedJSON = JsonSerializer.Serialize((LogUserDTO)editedUser);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
-        var result = await service.EditUser(new User { Id = 5, Forename = "bob", Surname = "Jones" }, _defaultCancellationToken);
+        var result = await service.EditUser(editedUser, _defaultCancellationToken);
         mockLogService.Verify(l => l.AddLog(
         It.Is<AddLogRequest>(r =>
             r.UserID == 5 &&
-            r.Details.Contains($"bob Jones has been updated")),
+            r.Details.Contains($"bob Jones has been updated") &&
+              r.JSONSnapShot == expectedJSON),
         It.IsAny<CancellationToken>()), Times.Once);
         result.Should().BeTrue();
     }

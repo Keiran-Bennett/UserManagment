@@ -1,4 +1,4 @@
-﻿using UserManagement.Services.Logs;
+﻿using UserManagement.Services.Logs.Services;
 using UserManagement.Services.Users.Services;
 
 namespace Microsoft.Extensions.DependencyInjection;

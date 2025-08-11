@@ -1,10 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace UserManagement.Services.Logs;
+namespace UserManagement.Services.Logs.Models;
 
 public class LogListViewModel
 {
+    public LogDTO SelectedLog { get; set; } = new();
     public List<LogDTO> Logs { get; set; } = new();
     public string SearchTerm { get; set; } = default!;
     public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Now.AddMonths(-1));

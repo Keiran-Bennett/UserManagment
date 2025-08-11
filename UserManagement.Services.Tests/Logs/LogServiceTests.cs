@@ -5,7 +5,8 @@ using System.Threading;
 using System.Threading.Tasks;
 using UserManagement.Data;
 using UserManagement.Models;
-using UserManagement.Services.Logs;
+using UserManagement.Services.Logs.Models;
+using UserManagement.Services.Logs.Services;
 
 namespace UserManagement.Services.Tests.Logs;
 

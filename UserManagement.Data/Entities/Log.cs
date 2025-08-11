@@ -9,4 +9,5 @@ public class Log
     public DateTime DateofAction { get; set; } = default!;
     public string Details { get; set; } = default!;
     public int Type { get; set; } = default!;
+    public string SnapShot { get; set; } = default!;
 }
