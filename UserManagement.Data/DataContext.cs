@@ -15,10 +15,7 @@ public class DataContext : DbContext, IDataContext
 
     public DataContext(DbContextOptions options) : base(options) { }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder options)
-    {
-       
-    }
+    protected override void OnConfiguring(DbContextOptionsBuilder options) { }
 
     protected override void OnModelCreating(ModelBuilder model)
     {

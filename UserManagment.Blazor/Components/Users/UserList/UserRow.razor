@@ -19,8 +19,9 @@
     <td>
         @(User.IsActive ? "Yes" : "No")
     </td>
-    <td>
+    <td class="d-flex justify-content-between">
         <button @onclick="() => ViewUser(User.Id)" type="button" class="btn btn-primary">View</button>
+        <button @onclick="() => EditUser(User.Id)" type="button" class="btn btn-primary mx-2">Edit</button>
         <button @onclick="() => DeleteUser(User.Id)" type="button" class="btn btn-danger">Delete</button>
     </td>
 </tr>
@@ -34,8 +35,13 @@
     [Parameter]
     public EventCallback<int> DeleteUserCallBack { get; set; }
 
+    [Parameter]
+    public EventCallback<int> EditUserCallBack { get; set; }
+
 
     protected async Task ViewUser(int id) => await ViewUserCallBack.InvokeAsync(id);
+
+    protected async Task EditUser(int id) => await EditUserCallBack.InvokeAsync(id);
 
     protected async Task DeleteUser(int id) => await DeleteUserCallBack.InvokeAsync(id);
 

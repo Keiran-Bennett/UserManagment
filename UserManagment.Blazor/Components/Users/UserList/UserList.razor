@@ -24,7 +24,7 @@
     <tbody>
         @foreach(var user in Model.Users)
         {
-            <UserRow User="user" ViewUserCallBack="ViewUser" DeleteUserCallBack="GoToDeleteUser" />
+            <UserRow User="user" ViewUserCallBack="ViewUser" DeleteUserCallBack="GoToDeleteUser" EditUserCallBack="GoToEditUser" />
         }
     </tbody>
 </table>
@@ -58,4 +58,7 @@
     protected void ViewUser(int ID) => NavigationManager.NavigateTo($"/userdetails/{ID}");
     protected void GoToDeleteUser(int ID) => NavigationManager.NavigateTo($"/deleteuser/{ID}");
     protected void GoToAddUser() => NavigationManager.NavigateTo($"/adduser");
+    protected void GoToEditUser(int ID) => NavigationManager.NavigateTo($"/edituser/{ID}");
 }
+}
+

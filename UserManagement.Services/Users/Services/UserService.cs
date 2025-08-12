@@ -85,7 +85,7 @@ public class UserService : IUserService
         try
         {
             await _dataContext.Update(user, cancellationToken);
-            var editUserLogRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been updated", logType = LogType.Update, JSONSnapShot = JsonSerializer.Serialize((LogUserDTO)user) };
+            var editUserLogRequest = CreateAddLogRequest(user);
             await LogAction(editUserLogRequest, cancellationToken);
             return true;
         }
@@ -95,6 +95,14 @@ public class UserService : IUserService
         }
     }
 
+    private static CreateLogRequest CreateAddLogRequest(User user) => new CreateLogRequest
+    {   UserID = user.Id,
+        DateOfAction = System.DateTime.Now,
+        Details = $"{user.Forename + " " + user.Surname} has been updated",
+        logType = LogType.Update,
+        JSONSnapShot = JsonSerializer.Serialize((LogUserDTO)user)
+    };
+
     public async Task<bool> DeleteUser(int userID, CancellationToken cancellationToken)
     {
         var user = await _dataContext.Get<User>(u => u.Id == userID, cancellationToken);
@@ -102,17 +110,19 @@ public class UserService : IUserService
             return false;
 
         await _dataContext.Delete(user, cancellationToken);
-        var logDeleteRequest = new AddLogRequest { UserID = userID, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been deleted", logType = LogType.Delete, JSONSnapShot = JsonSerializer.Serialize((LogUserDTO)user) };
+        var logDeleteRequest = CreateAddDeleteLogRequest(userID, user);
         await LogAction(logDeleteRequest, cancellationToken);
         return true;
     }
+
+    private static CreateLogRequest CreateAddDeleteLogRequest(int userID, User user) => new CreateLogRequest { UserID = userID, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been deleted", logType = LogType.Delete, JSONSnapShot = JsonSerializer.Serialize((LogUserDTO)user) };
 
     public async Task<bool> AddUser(User user, CancellationToken cancellationToken)
     {
         try
         {
             await _dataContext.Create(user, cancellationToken);
-            var logAddNewUserRequest = new AddLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been added", logType = LogType.Add, JSONSnapShot = JsonSerializer.Serialize((LogUserDTO)user) };
+            var logAddNewUserRequest = new CreateLogRequest { UserID = user.Id, DateOfAction = System.DateTime.Now, Details = $"{user.Forename + " " + user.Surname} has been added", logType = LogType.Add, JSONSnapShot = JsonSerializer.Serialize((LogUserDTO)user) };
             await LogAction(logAddNewUserRequest, cancellationToken);
             return true;
         }
@@ -123,6 +133,6 @@ public class UserService : IUserService
        
     }
 
-    private async Task LogAction(AddLogRequest logRequest, CancellationToken cancellationToken) => await _logService.AddLog(logRequest,cancellationToken);
+    private async Task LogAction(CreateLogRequest logRequest, CancellationToken cancellationToken) => await _logService.AddLog(logRequest,cancellationToken);
 }
 

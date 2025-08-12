@@ -15,6 +15,7 @@ public class DataContextTests
     {
         // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var dataContext = CreateNamedDataContext("1");
+
         // Act: Invokes the method under test with the arranged parameters.
         User? entity = await dataContext.Get<User>(u => u.Forename == "Robin", _defaultCancellationToken);
 
@@ -58,7 +59,7 @@ public class DataContextTests
 
         // Act: Invokes the method under test with the arranged parameters.
         User? deletedUser = await dataContext.Get<User>(u => u.Id == 1, _defaultCancellationToken);
-        await dataContext.Delete<User>((User)deletedUser!, _defaultCancellationToken);
+        await dataContext.Delete(deletedUser!, _defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         if (dataContext is DataContext dc)

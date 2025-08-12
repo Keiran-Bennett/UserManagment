@@ -6,13 +6,12 @@ namespace UserManagement.Services.Logs.Models;
 
 public class LogDTO
 {
-    public long Id { get; set; }
+    public int Id { get; set; }
     public int UserID { get; set; } = default!;
     public DateTime DateofAction { get; set; } = default!;
     public string Details { get; set; } = default!;
     public LogType LogType { get; set; }
-    public string UserName { get; set; } = default!;
-    public LogUserDTO Snapshot { get; set; } = default!;
+    public LogUserDTO Snapshot { get; set; } = new();
 
 
     public static explicit operator Log(LogDTO model) => new Log
@@ -33,33 +32,5 @@ public class LogDTO
         Details = log.Details,
         LogType = (LogType) log.Type,
         Snapshot = JsonSerializer.Deserialize<LogUserDTO>(log.SnapShot) ?? new LogUserDTO { },
-    };
-
-}
-
-public class LogUserDTO
-{
-    public string Forename { get; set; } = string.Empty;
-    public string Surname { get; set; } = string.Empty;
-    public string Email { get; set; } = string.Empty;
-    public DateOnly DateOfBirth { get; set; }
-    public bool IsActive { get; set; }
-
-    public static explicit operator LogUserDTO(User user) => new LogUserDTO
-    {
-        Forename = user.Forename,
-        Surname = user.Surname,
-        Email = user.Email,
-        DateOfBirth = user.DateOfBirth,
-        IsActive = user.IsActive,
-    };
-
-    public static explicit operator User(LogUserDTO model) => new User
-    {
-        Forename = model.Forename,
-        Surname = model.Surname,
-        Email = model.Email,
-        DateOfBirth = model.DateOfBirth,
-        IsActive = model.IsActive,
     };
 }

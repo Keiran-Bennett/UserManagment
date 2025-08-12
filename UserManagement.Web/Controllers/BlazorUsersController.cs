@@ -90,48 +90,26 @@ public class BlazorUsersController : Controller
     public async Task<IActionResult> ConfirmDelete(int id, CancellationToken cancellationToken)
     {
         bool IsSuccess = await _userService.DeleteUser(id,cancellationToken);
-        if (!IsSuccess)
-            return Ok(new UserDeleteViewModel { IsSuccess = false });
-        else
-            return Ok(new UserDeleteViewModel { IsSuccess = true });
+        return Ok(new UserDeleteViewModel { IsSuccess = IsSuccess });
     }
-
 
     [HttpGet("edit/{id:int}")]
-    public async Task<IActionResult> Edit(int id, CancellationToken token)
+    public async Task<IActionResult> Edit(int id, CancellationToken cancellationToken)
     {
-        var user = await _userService.GetUser(id, token);
-        var userViewModel = CreateEditViewModelFromUser(user);
-        return View(userViewModel);
-    }
-
-    private static UserEditViewModel CreateEditViewModelFromUser(User? user)
-    {
-        if (user == null)
-            return new UserEditViewModel { IsSuccess = false };
-        else
-            return new UserEditViewModel
-            {
-                User = (UserFormDTO)user,
-                IsSuccess = true
-            };
+        var user = await _userService.GetUser(id,cancellationToken);
+        return Ok(new UserEditViewModel { IsSuccess = true, User = (UserFormDTO) user });
     }
 
     [HttpPost("confirmedit")]
-    public async Task<IActionResult> ConfirmEdit(UserEditViewModel model, CancellationToken cancellationToken)
+    public async Task<IActionResult> ConfirmEdit([FromBody] UserFormDTO model, CancellationToken cancellationToken)
     {
-        if (!ModelState.IsValid)
-            return View(model);
+        var result = await _userService.EditUser((User)model, cancellationToken);
+        return Ok(new UserEditViewModel { IsSuccess = result, User = model });
 
-        var result = await _userService.EditUser((User)model.User, cancellationToken);
-        if (!result)
-            return View(model);
-
-        return RedirectToAction("View", new { id = model.User.Id });
     }
 
     [HttpPost("confirmadd")]
-    public async Task<IActionResult> ConfirmAdd(UserFormDTO model, CancellationToken cancellationToken)
+    public async Task<IActionResult> ConfirmAdd([FromBody] UserFormDTO model, CancellationToken cancellationToken)
     {
         if(!ModelState.IsValid)
             return Ok(new UserAddViewModel { User = model, IsSuccess = true });

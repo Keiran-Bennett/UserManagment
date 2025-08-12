@@ -1,0 +1,29 @@
+﻿@using UserManagement.Services.Logs.Models
+<tr>
+    <td>
+        @Log.DateofAction
+    </td>
+    <td>
+        @Log.Snapshot.Forename @Log.Snapshot.Surname
+    </td>
+    <td>
+        @Log.LogType
+    </td>
+    <td>
+        <button @onclick="() => SelectLog(Log.Id)" class="btn btn-secondary">View More Details</button>
+    </td>
+</tr>
+
+@code {
+    [Parameter]
+    public LogDTO Log { get; set; } = new();
+
+    [Parameter]
+    public EventCallback<int> SelectedLogCallBack { get; set; }
+
+    protected async Task SelectLog(int id)
+    {
+        await SelectedLogCallBack.InvokeAsync(id);
+    }
+
+}

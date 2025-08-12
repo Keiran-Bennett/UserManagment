@@ -9,13 +9,15 @@ public class UserConversionTests
     [Fact]
     public void User_ConvertToViewModelToUser_ShouldHaveSameValues()
     {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var user = CreateUser();
 
+        // Act: Invokes the method under test with the arranged parameters.
         var userViewModel = (UserDTO) user;
         user = null;
         user = (User)userViewModel;
 
-
+        // Assert: Verifies that the action of the method under test behaves as expected.
         userViewModel.Id.Should().Be(user.Id);
         userViewModel.Forename.Should().Be(user.Forename);
         userViewModel.Surname.Should().Be(user.Surname);
@@ -27,13 +29,15 @@ public class UserConversionTests
     [Fact]
     public void User_FormDTO_ConvertToViewModelToUser_ShouldHaveSameValues()
     {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         var user = CreateUser();
 
+        // Act: Invokes the method under test with the arranged parameters.
         var userViewModel = (UserFormDTO)user;
         user = null;
         user = (User)userViewModel;
 
-
+        // Assert: Verifies that the action of the method under test behaves as expected.
         userViewModel.Id.Should().Be(user.Id);
         userViewModel.Forename.Should().Be(user.Forename);
         userViewModel.Surname.Should().Be(user.Surname);

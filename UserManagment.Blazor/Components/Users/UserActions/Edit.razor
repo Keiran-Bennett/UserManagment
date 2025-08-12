@@ -1,14 +1,14 @@
-﻿@page "/adduser"
+﻿@page "/edituser/{id:int}"
 @using UserManagement.Services.Users
 @using UserManagement.Services.Users.Models
 @using UserManagment.Blazor.Components.Shared
 @rendermode InteractiveServer
 
-<h2>Add User</h2>
+<h2>Edit User</h2>
 
  @if(Model.IsSuccess == true)
 {
-    <UserForm OnSuccessCallback="HandleValidSubmit" OnCancelCallBack="Cancel" />
+    <UserForm User="Model.User" OnSuccessCallback="HandleValidSubmit" OnCancelCallBack="Cancel" />
 }
 else
 {
@@ -22,20 +22,32 @@ else
     [Inject]
     public NavigationManager NavigationManager { get; set; } = default!;
 
-    protected UserAddViewModel Model { get; set; } = default!;
+    [Parameter]
+    public int Id { get; set; }
+
+    protected UserEditViewModel Model { get; set; } = default!;
 
     protected override void OnInitialized()
     {
         Model = new() { IsSuccess = true };
     }
 
+    protected override async Task OnParametersSetAsync()
+    {
+        var response = await API.GetJsonAsync<UserEditViewModel>($"users/edit/{Id}");
+        if (response == null || response.IsSuccess)
+            Model.IsSuccess = false;
+
+        Model = response ?? new();
+    }
+
     private async Task HandleValidSubmit(UserFormDTO userForm)
     {
-        var response = await API.PostJsonAsync<UserFormDTO,UserAddViewModel>("users/confirmadd", userForm) ?? new();
+        var response = await API.PostJsonAsync<UserFormDTO,UserAddViewModel>("users/confirmedit", userForm) ?? new();
         if (response.IsSuccess)
             NavigationManager.NavigateTo("/userlist");
         else
-            response.IsSuccess = false;   
+            Model.IsSuccess = false;   
     }
 
     private void Cancel()

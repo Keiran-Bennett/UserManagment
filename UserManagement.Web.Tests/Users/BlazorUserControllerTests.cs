@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc;
@@ -171,7 +172,7 @@ public class BlazorUserControllerTests
         var controller = CreateAddUserControllerWithSuccess();
 
         // Act: Invokes the method under test with the arranged parameters.
-        var result = await controller.ConfirmAdd(CreateAddModel(), _defaultCancellationToken);
+        var result = await controller.ConfirmAdd(CreateUserFormModel(), _defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeOfType<OkObjectResult>()
@@ -187,7 +188,7 @@ public class BlazorUserControllerTests
         var controller = CreateAddUserControllerWithSuccess();
 
         // Act: Invokes the method under test with the arranged parameters.
-        var result = await controller.ConfirmAdd(CreateAddModel(), _defaultCancellationToken);
+        var result = await controller.ConfirmAdd(CreateUserFormModel(), _defaultCancellationToken);
 
         result.Should().BeOfType<OkObjectResult>()
            .Which.Value.Should().BeOfType<UserAddViewModel>()
@@ -209,7 +210,7 @@ public class BlazorUserControllerTests
         var controller = CreateAddUserControllerWithFailure();
 
         // Act: Invokes the method under test with the arranged parameters.
-        var result = await controller.ConfirmAdd(CreateAddModel(), _defaultCancellationToken);
+        var result = await controller.ConfirmAdd(CreateUserFormModel(), _defaultCancellationToken);
 
         result.Should().BeOfType<OkObjectResult>()
             .Which.Value.Should().BeOfType<UserAddViewModel>()
@@ -224,12 +225,76 @@ public class BlazorUserControllerTests
         return controller;
     }
 
-    private static UserFormDTO CreateAddModel() =>
+    private static UserFormDTO CreateUserFormModel() =>
          new UserFormDTO
-        {
-            Surname = "Test",
-            Email = "test",
-        };
+         {
+             Surname = "Test",
+             Email = "test",
+         };
+
+
+    [Fact]
+    public async Task Edit_ServicePasses_ReturnsTrueOnModel()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+
+        Mock<IUserService> userService = new();
+        userService.Setup(us => us.GetUser(It.IsAny<int>(), It.IsAny<CancellationToken>())).ReturnsAsync(new User { Id = 3, Forename = "test user", Logs = new List<Log> { } });
+        var controller = new BlazorUsersController(userService.Object);
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await controller.Edit(3, _defaultCancellationToken);
+
+        var r = result.Should().BeOfType<OkObjectResult>()
+            .Which.Value.Should().BeOfType<UserEditViewModel>();
+
+        r.Which.IsSuccess.Should().BeTrue();
+        r.Which.User.Should().BeEquivalentTo((UserFormDTO)new User { Id = 3, Forename = "test user", Logs = new List<Log> { } });
+    }
+
+    [Fact]
+    public async Task ConfirmEdit_ServiceFails_ReturnsFalseOnModel()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        var controller = CreateEditUserControllerWithFailure();
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await controller.ConfirmEdit(CreateUserFormModel(), _defaultCancellationToken);
+
+        result.Should().BeOfType<OkObjectResult>()
+            .Which.Value.Should().BeOfType<UserEditViewModel>()
+            .Which.IsSuccess.Should().BeFalse();
+    }
+
+    private static BlazorUsersController CreateEditUserControllerWithFailure()
+    {
+        Mock<IUserService> userService = new();
+        userService.Setup(us => us.EditUser(It.IsAny<User>(), It.IsAny<CancellationToken>())).ReturnsAsync(false);
+        var controller = new BlazorUsersController(userService.Object);
+        return controller;
+    }
+
+    [Fact]
+    public async Task ConfirmEdit_ServicePasses_ReturnsTrueOnModel()
+    {
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        var controller = CreateEditUserControllerWithSuccess();
+
+        // Act: Invokes the method under test with the arranged parameters.
+        var result = await controller.ConfirmEdit(CreateUserFormModel(), _defaultCancellationToken);
+
+        result.Should().BeOfType<OkObjectResult>()
+            .Which.Value.Should().BeOfType<UserEditViewModel>()
+            .Which.IsSuccess.Should().BeTrue();
+     }
+
+    private static BlazorUsersController CreateEditUserControllerWithSuccess()
+    {
+        Mock<IUserService> userService = new();
+        userService.Setup(us => us.EditUser(It.IsAny<User>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
+        var controller = new BlazorUsersController(userService.Object);
+        return controller;
+    }
 }
 
 

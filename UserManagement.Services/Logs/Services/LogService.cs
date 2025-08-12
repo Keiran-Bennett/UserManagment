@@ -15,7 +15,7 @@ public class LogService : ILogService
     private readonly IDataContext _dataContext;
     public LogService(IDataContext dataContext) => _dataContext = dataContext;
 
-    public async Task<bool> AddLog(AddLogRequest request, CancellationToken cancellationToken)
+    public async Task<bool> AddLog(CreateLogRequest request, CancellationToken cancellationToken)
     {
         try
         {
@@ -29,7 +29,7 @@ public class LogService : ILogService
         }
     }
 
-    private static Log CreateLog(AddLogRequest request) => new Log
+    private static Log CreateLog(CreateLogRequest request) => new Log
     {
         Details = request.Details,
         DateofAction = request.DateOfAction,
@@ -54,23 +54,22 @@ public class LogService : ILogService
     private IQueryable<Log> GetLogsQuery(LogListViewModel viewModel)
     {
         var logsQuery = GetLogsWithinDatePeriod(viewModel);
-        logsQuery = ApplySpecificFilters(viewModel, logsQuery);
+        if (viewModel.IsFilterEnabled)
+            logsQuery = ApplySpecificFilters(viewModel, logsQuery);
+
         return logsQuery;
     }
 
     private IQueryable<Log> GetLogsWithinDatePeriod(LogListViewModel viewModel) => _dataContext.GetAll<Log>()
-               .Where(l => DateOnly.FromDateTime(l.DateofAction) >= viewModel.StartDate &
-               DateOnly.FromDateTime(l.DateofAction) <= viewModel.EndDate).AsQueryable();
+        .Where(l => DateOnly.FromDateTime(l.DateofAction) >= viewModel.StartDate & DateOnly.FromDateTime(l.DateofAction) <= viewModel.EndDate).AsQueryable();
 
     private static IQueryable<Log> ApplySpecificFilters(LogListViewModel viewModel, IQueryable<Log> logsQuery)
     {
-        if (viewModel.IsFilterEnabled)
-        {
-            if (viewModel.Type > 0)
-                logsQuery = logsQuery.Where(l => l.Type == viewModel.Type);
-            if (!string.IsNullOrEmpty(viewModel.SearchTerm))
-                logsQuery = logsQuery.Where(l => l.Details.Contains(viewModel.SearchTerm));
-        }
+        if (viewModel.Type > 0)
+            logsQuery = logsQuery.Where(l => l.Type == viewModel.Type);
+
+       if (!string.IsNullOrEmpty(viewModel.SearchTerm))
+            logsQuery = logsQuery.Where(l => l.Details.Contains(viewModel.SearchTerm) | (l.SnapShot != null && l.SnapShot.Contains(viewModel.SearchTerm)));
 
         return logsQuery;
     }

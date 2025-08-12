@@ -1,0 +1,142 @@
+﻿@page "/logs"
+@using Microsoft.AspNetCore.Mvc.Rendering
+@using UserManagement.Services
+@using UserManagement.Services.Logs.Models
+@using UserManagement.Services.Users
+@using UserManagement.Services.Users.Models
+@rendermode InteractiveServer
+
+
+<PageTitle>Logs</PageTitle>
+
+<h1>Logs</h1>
+
+<div class="row">
+    <div class="col-6">
+        <label for="startDate">Start Date</label>
+        <input @bind-value="Model.StartDate" class="form-control" />
+    </div>
+    <div class="col-6">
+        <label for="endDate">End Date</label>
+        <InputDate @bind-Value="Model.EndDate" class="form-control" />
+    </div>
+    <div class="col-6">
+        <label for="searchTerm">Description</label>
+        <InputText @bind-Value="Model.SearchTerm" class="form-control" placeholder="Search description..." />
+    </div>
+    <div class="col-6">
+        <label for="type">Type</label>
+        <InputSelect @bind-Value="Model.Type" class="form-select">
+            <option value="">All</option>
+            <option value="1">Add</option>
+            <option value="2">Delete</option>
+            <option value="3">Update</option>
+        </InputSelect>
+    </div>
+
+    <div class="col d-flex align-items-center">
+        <div class="form-check mt-4">
+            <input class="form-check-input" type="checkbox" @bind-value="Model.IsFilterEnabled" />
+            <label class="form-check-label" for="isFilterEnabled">
+                Enable Filter
+            </label>
+        </div>
+
+    </div>
+    <div class="col d-flex align-items-end mt-3">
+        <button @onclick="FilterPage" class="btn btn-primary">Filter</button>
+        <a @onclick="ClearPage" class="btn btn-secondary ms-2">Clear</a>
+    </div>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>DateTime</th>
+            <th>User</th>
+            <th>Type</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var log in Model.Logs)
+        {
+            <LogRow Log="log" SelectedLogCallBack="SetCurrentLog" />
+        }
+    </tbody>
+</table>
+
+<div class="modal fade" id="logModal" tabindex="-1" aria-labelledby="logModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="logModalLabel">Log Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <h6>Log Info</h6>
+                
+                <p><strong>Date:</strong> @SelectedLog.DateofAction</p>
+                <p><strong>Type:</strong> @SelectedLog.LogType</p>
+                <p><strong>Details:</strong> @SelectedLog.Details</p>
+
+                <hr />
+                <h6>User Snapshot</h6>
+                <p><strong>Forename:</strong> @SelectedLog.Snapshot.Forename</p>
+                <p><strong>Surname:</strong> @SelectedLog.Snapshot.Surname</p>
+                <p><strong>Email:</strong> @SelectedLog.Snapshot.Email</p>
+                <p><strong>Date of Birth:</strong> @SelectedLog.Snapshot.DateOfBirth</p>
+                <p><strong>Active:</strong> @(SelectedLog.Snapshot.IsActive ? "Yes" : "No")</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+@code {
+    [Inject]
+    public APIService.IApiService API { get; set; } = default!;
+
+    [Inject]
+    public NavigationManager NavigationManager { get; set; } = default!;
+
+    [Inject]
+    public IJSRuntime JS { get; set; } = default!;
+
+    protected LogListViewModel Model { get; set; } = new();
+    protected LogDTO SelectedLog { get; set; } = new();
+
+    protected string EndpointName => "logs/list";
+
+    protected async Task SetCurrentLog(int logID)
+    {
+        LogDTO log = Model.Logs.Where(l => l.Id == logID).First();
+        SelectedLog = log;
+        await JS.InvokeVoidAsync("bootstrapInterop.showModal", "#logModal");
+    }
+
+    protected async Task FilterPage()
+    {
+        await RefreshPage(Model);
+    }
+
+    protected async Task ClearPage()
+    {
+        await RefreshPage(new());
+    }
+
+    protected override async Task OnParametersSetAsync()
+    {
+        await RefreshPage(Model);
+    }
+
+    protected async Task RefreshPage(LogListViewModel model)
+    {
+        Model = await API.PostJsonAsync<LogListViewModel, LogListViewModel>(EndpointName, model) ?? new();
+    }
+
+}

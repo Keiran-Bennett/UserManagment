@@ -1,0 +1,60 @@
+﻿@using Microsoft.AspNetCore.Components.Forms
+@using UserManagement.Services.Users.Models
+  <EditForm Model="User" OnValidSubmit="SubmitForm" formname="AddorEditUserForm">
+        <DataAnnotationsValidator />
+        <ValidationSummary />
+
+        <div class="form-group">
+            <label for="forename">Forename</label>
+            <InputText id="forename" class="form-control" @bind-Value="User.Forename" />
+            <ValidationMessage For="@(() => User.Forename)" />
+        </div>
+
+        <div class="form-group">
+            <label for="surname">Surname</label>
+            <InputText id="surname" class="form-control" @bind-Value="User.Surname" />
+            <ValidationMessage For="@(() => User.Surname)" />
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email</label>
+            <InputText id="email" type="email" class="form-control" @bind-Value="User.Email" />
+            <ValidationMessage For="@(() => User.Email)" />
+        </div>
+
+        <div class="form-group">
+            <label for="dob">Date of Birth</label>
+            <InputDate id="dob" class="form-control" @bind-Value="User.DateOfBirth" />
+            <ValidationMessage For="@(() => User.DateOfBirth)" />
+        </div>
+
+        <div class="form-group form-check">
+            <InputCheckbox id="isActive" class="form-check-input" @bind-Value="User.IsActive" />
+            <label class="form-check-label" for="isActive">Is Active</label>
+            <ValidationMessage For="@(() => User.IsActive)" />
+        </div>
+
+        <button type="submit" class="btn btn-primary">Save</button>
+        <button type="button" class="btn btn-secondary" @onclick="Cancel">Cancel</button>
+    </EditForm>
+@code {
+    [Parameter]
+    public UserFormDTO User { get; set; } = new();
+
+    [Parameter]
+    public EventCallback OnCancelCallBack { get; set; }
+
+    protected async Task Cancel()
+    {
+        await OnCancelCallBack.InvokeAsync();
+    }
+
+    [Parameter]
+    public EventCallback<UserFormDTO> OnSuccessCallback { get; set; }
+
+    protected async Task SubmitForm()
+    {
+        await OnSuccessCallback.InvokeAsync(User);
+    }
+
+}

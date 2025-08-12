@@ -5,7 +5,6 @@ namespace UserManagement.Models;
 
 public class User
 {
-
     public int Id { get; set; }
     public string Forename { get; set; } = default!;
     public string Surname { get; set; } = default!;
