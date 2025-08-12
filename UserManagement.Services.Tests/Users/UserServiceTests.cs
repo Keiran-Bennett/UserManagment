@@ -117,20 +117,29 @@ public class UserServiceTests
     [Fact]
     public async Task GetUser_Success_ReturnsUser()
     {
-        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+        var getUser = CreateGetUser();
+
         Mock<IDataContext> dataContext = new();
         dataContext
             .Setup(s => s.Get(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(new User { Id = 2, Forename = "bob", Surname = "Jones" });
+            .ReturnsAsync(getUser);
         var service = new UserService(dataContext.Object, _loggerService.Object);
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await service.GetUser(2, _defaultCancellationToken);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
-        result.Should().BeEquivalentTo(new User { Id = 2, Forename = "bob", Surname = "Jones" });
-        _loggerService.Verify(l => l.GetAllLogsPerUser(2, It.IsAny<CancellationToken>()), Times.Once);
+        result.Should().BeEquivalentTo(getUser);
     }
+
+    private static User CreateGetUser() =>        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+            new User
+            {
+                Id = 2,
+                Forename = "bob",
+                Surname = "Jones",
+                Logs = new List<Log> { new Log { UserID = 2, DateofAction = DateTime.Now } }
+            };
 
     [Fact]
     public async Task AddUser_Success_ReturnTrueAndLogEntry()

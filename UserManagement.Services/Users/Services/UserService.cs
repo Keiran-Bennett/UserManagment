@@ -71,12 +71,6 @@ public class UserService : IUserService
     private async Task<User?> GetUserWithLogs(int userID, CancellationToken cancellationToken)
     {
         var user = await _dataContext.Get<User>(u => u.Id == userID,cancellationToken);
-        if (user != null)
-        {
-            var logs = await _logService.GetAllLogsPerUser(user.Id,cancellationToken);
-            user.Logs = logs.ToList();
-        }
-
         return user;
     }
 

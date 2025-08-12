@@ -73,17 +73,4 @@ public class LogService : ILogService
 
         return logsQuery;
     }
-
-    public async Task<IEnumerable<Log>> GetAllLogsPerUser(int userID, CancellationToken cancellationToken)
-    {
-        try
-        {
-            var logs = await _dataContext.GetAll<Log>().Where(l => l.UserID == userID).ToListAsync(cancellationToken);
-            return logs;
-        }
-        catch
-        {
-            return new List<Log>();
-        }
-    }
 }

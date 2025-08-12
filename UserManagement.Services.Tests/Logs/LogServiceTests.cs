@@ -45,36 +45,7 @@ public class LogServiceTests
         result.Should().BeTrue();
     }
 
-    [Fact]
-    public async Task LogService_GetUserLogs_Success_ReturnWith3InList()
-    {
-        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        Mock<IDataContext> dataContextMock = new();
-        dataContextMock.Setup(s => s.GetAll<Log>()).Returns(new TestAsyncEnumerable<Log>(CreateLogs().AsEnumerable()));
-        LogService logService = new(dataContextMock.Object);
 
-        // Act: Invokes the method under test with the arranged parameters.
-        var result = await logService.GetAllLogsPerUser(5, _defaultCancellationToken);
-
-        // Assert: Verifies that the action of the method under test behaves as expected.
-        result.Count().Should().Be(3);
-    }
-
-
-    [Fact]
-    public async Task LogService_GetUserLogs_Failure_ReturnEmptyList()
-    {
-        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
-        Mock<IDataContext> dataContextMock = new();
-        dataContextMock.Setup(s => s.GetAll<Log>()).Throws(new Exception("test"));
-        LogService logService = new(dataContextMock.Object);
-
-        // Act: Invokes the method under test with the arranged parameters.
-        var result = await logService.GetAllLogsPerUser(1, _defaultCancellationToken);
-        
-        // Assert: Verifies that the action of the method under test behaves as expected.
-        result.Count().Should().Be(0);
-    }
 
     [Fact]
     public async Task LogService_GetAllLogs_Success_ReturnListOfLogs()

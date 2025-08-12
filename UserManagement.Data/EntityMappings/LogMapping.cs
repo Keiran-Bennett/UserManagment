@@ -10,5 +10,11 @@ internal class LogMapping : IEntityTypeConfiguration<Log>
     {
         builder.ToTable("Logs");
         builder.HasKey(x => x.Id);
+
+        builder
+            .HasOne(p => p.User)
+            .WithMany(p => p.Logs)
+            .HasForeignKey(p => p.UserID);
+
     }
 }

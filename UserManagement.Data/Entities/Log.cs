@@ -6,6 +6,7 @@ public class Log
 {
     public int Id { get; set; }
     public int UserID { get; set; } = default!;
+    public User User { get; set; } = default!;
     public DateTime DateofAction { get; set; } = default!;
     public string Details { get; set; } = default!;
     public int Type { get; set; } = default!;
