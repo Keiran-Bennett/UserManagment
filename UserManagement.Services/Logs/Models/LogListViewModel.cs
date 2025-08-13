@@ -10,6 +10,7 @@ public class LogListViewModel
     public string SearchTerm { get; set; } = default!;
     public DateOnly StartDate { get; set; } = DateOnly.FromDateTime(DateTime.Now.AddMonths(-1));
     public DateOnly EndDate { get; set; } = DateOnly.FromDateTime(DateTime.Now);
+    public int UserID { get; set; }
     public int Type { get; set; }
     public bool IsFilterEnabled { get; set; }   
 }

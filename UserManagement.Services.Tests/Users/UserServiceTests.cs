@@ -19,6 +19,7 @@ public class UserServiceTests
     private CancellationToken _defaultCancellationToken => new CancellationTokenSource().Token;
     private Mock<IDataContext> _dataContext => SetupActiveUsersDataModels();
     private readonly Mock<ILogService> _loggerService = new();
+    private readonly Mock<IUserRepository> _userRepoMock = new();
 
     [Fact]
     public async Task GetAll_WhenContextReturnsEntities_MustReturnSameEntities()
@@ -120,10 +121,9 @@ public class UserServiceTests
         var getUser = CreateGetUser();
 
         Mock<IDataContext> dataContext = new();
-        dataContext
-            .Setup(s => s.Get(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
-            .ReturnsAsync(getUser);
-        var service = new UserService(dataContext.Object, _loggerService.Object);
+        _userRepoMock.Setup(u => u.GetUsersWithLogs(It.Is<int>(x => x == 2), It.IsAny<CancellationToken>())).ReturnsAsync(getUser);
+
+        var service = new UserService(dataContext.Object, _loggerService.Object, _userRepoMock.Object);
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await service.GetUser(2, _defaultCancellationToken);
@@ -148,7 +148,7 @@ public class UserServiceTests
         var dataContext = MockDataContextWithIDMatching();
         var mockLogService = new Mock<ILogService>();
         mockLogService.Setup(l => l.AddLog(It.IsAny<CreateLogRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
-        var service = new UserService(dataContext.Object, mockLogService.Object);
+        var service = new UserService(dataContext.Object, mockLogService.Object, _userRepoMock.Object);
 
         // Act: Invokes the method under test with the arranged parameters.
         var addedUser = new User { Id = 5, Forename = "bob", Surname = "Jones" };
@@ -160,7 +160,7 @@ public class UserServiceTests
                 It.Is<CreateLogRequest>(r =>
                     r.UserID == 5 &&
                     r.Details.Contains($"bob Jones has been added") &&
-                    r.JSONSnapShot ==  expectedJSON),
+                    r.JSONSnapShot == expectedJSON),
                 It.IsAny<CancellationToken>()), Times.Once);
         result.Should().BeTrue();
     }
@@ -172,7 +172,7 @@ public class UserServiceTests
         Mock<IDataContext> dataContext = new();
         dataContext
             .Setup(s => s.Create(It.IsAny<User>(), It.IsAny<CancellationToken>())).Throws(new Exception("Test catch"));
-        var service = new UserService(dataContext.Object, _loggerService.Object);
+        var service = new UserService(dataContext.Object, _loggerService.Object, _userRepoMock.Object);
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await service.AddUser(new User { Id = 5, Forename = "bob", Surname = "Jones" }, _defaultCancellationToken);
@@ -189,7 +189,7 @@ public class UserServiceTests
         dataContext
             .Setup(s => s.Get(It.IsAny<Expression<Func<User, bool>>>(), It.IsAny<CancellationToken>()))
             .ReturnsAsync((User)null!);
-        var service = new UserService(dataContext.Object, _loggerService.Object);
+        var service = new UserService(dataContext.Object, _loggerService.Object, _userRepoMock.Object);
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await service.DeleteUser(5, _defaultCancellationToken);
@@ -205,7 +205,7 @@ public class UserServiceTests
         var mockLogService = new Mock<ILogService>();
         mockLogService.Setup(l => l.AddLog(It.IsAny<CreateLogRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
         var dataContext = MockDataContextWithIDMatching();
-        var service = new UserService(dataContext.Object, mockLogService.Object);
+        var service = new UserService(dataContext.Object, mockLogService.Object, _userRepoMock.Object);
 
         // Act: Invokes the method under test with the arranged parameters.
         var result = await service.DeleteUser(5, _defaultCancellationToken);
@@ -229,7 +229,7 @@ public class UserServiceTests
             .Setup(s => s.Update(It.IsAny<User>(), It.IsAny<CancellationToken>())).Throws(new Exception("Test catch"));
 
         // Act: Invokes the method under test with the arranged parameters.
-        var service = new UserService(dataContext.Object, _loggerService.Object);
+        var service = new UserService(dataContext.Object, _loggerService.Object, _userRepoMock.Object);
 
         // Assert: Verifies that the action of the method under test behaves as expected.
         var result = await service.EditUser(new User { Id = 5, Forename = "bob", Surname = "Jones" }, _defaultCancellationToken);
@@ -243,7 +243,7 @@ public class UserServiceTests
         var mockLogService = new Mock<ILogService>();
         mockLogService.Setup(l => l.AddLog(It.IsAny<CreateLogRequest>(), It.IsAny<CancellationToken>())).ReturnsAsync(true);
         var dataContext = MockDataContextWithIDMatching();
-        var service = new UserService(dataContext.Object, mockLogService.Object);
+        var service = new UserService(dataContext.Object, mockLogService.Object, _userRepoMock.Object);
         var editedUser = new User { Id = 5, Forename = "bob", Surname = "Jones" };
 
         // Act: Invokes the method under test with the arranged parameters.
@@ -261,12 +261,12 @@ public class UserServiceTests
         result.Should().BeTrue();
     }
 
-    private UserService CreateStandardService() => new(_dataContext.Object, _loggerService.Object);
+    private UserService CreateStandardService() => new(_dataContext.Object, _loggerService.Object, _userRepoMock.Object);
     private UserService CreateServiceWithMockedErrors()
     {
         Mock<IDataContext> dataContextWithErrors = new();
         dataContextWithErrors.Setup(s => s.GetAll<User>()).Throws(new Exception("test exception"));
-        return new(dataContextWithErrors.Object, _loggerService.Object);
+        return new(dataContextWithErrors.Object, _loggerService.Object, _userRepoMock.Object);
     }
 
     private static Mock<IDataContext> MockDataContextWithIDMatching()

@@ -1,5 +1,4 @@
-﻿
-namespace UserManagement.Services;
+﻿namespace UserManagement.Services.Users.Models;
 public enum UserRetrievalType
 {
     Default = 1,

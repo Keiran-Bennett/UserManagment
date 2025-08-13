@@ -15,10 +15,12 @@ public class UserService : IUserService
 {
     private readonly IDataContext _dataContext;
     private readonly ILogService _logService;
-    public UserService(IDataContext dataContext, ILogService logService)
+    private readonly IUserRepository _userRepository;
+    public UserService(IDataContext dataContext, ILogService logService, IUserRepository userRepository)
     {
         _dataContext = dataContext;
         _logService = logService;
+        _userRepository = userRepository;
     }
     public async Task<IEnumerable<User>> GetAll(CancellationToken cancellationToken)
     {
@@ -60,7 +62,7 @@ public class UserService : IUserService
     {
         try
         {
-            return await GetUserWithLogs(userID, cancellationToken) ?? throw new System.Exception("User cannot be found");
+            return await _userRepository.GetUsersWithLogs(userID,cancellationToken) ?? throw new System.Exception("User cannot be found");
         }
         catch
         {
@@ -68,12 +70,6 @@ public class UserService : IUserService
         }        
     }
     
-    private async Task<User?> GetUserWithLogs(int userID, CancellationToken cancellationToken)
-    {
-        var user = await _dataContext.Get<User>(u => u.Id == userID,cancellationToken);
-        return user;
-    }
-
     public async Task<bool> EditUser(User user, CancellationToken cancellationToken)
     {
         try
