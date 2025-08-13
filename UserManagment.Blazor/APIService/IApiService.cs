@@ -1,5 +1,5 @@
 ﻿
-namespace UserManagment.Blazor.APIService;
+namespace UserManagement.Blazor.APIService;
 
 public interface IApiService
 {

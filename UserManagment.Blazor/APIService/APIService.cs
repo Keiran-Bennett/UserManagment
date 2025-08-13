@@ -1,4 +1,4 @@
-﻿namespace UserManagment.Blazor.APIService;
+﻿namespace UserManagement.Blazor.APIService;
 
 using System.Net.Http.Json;
 

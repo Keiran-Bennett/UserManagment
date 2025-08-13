@@ -27,7 +27,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "UserManagement.Web.Tests", 
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "DatabaseDeploy", "DatabaseDeploy\DatabaseDeploy.sqlproj", "{B59D2B31-6900-43FB-A9C1-AAC308FC0FCD}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserManagment.Blazor", "UserManagment.Blazor\UserManagment.Blazor.csproj", "{D39A3558-1096-4B48-8997-8A96ACE07456}"
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserManagement.Blazor", "UserManagment.Blazor\UserManagement.Blazor.csproj", "{D39A3558-1096-4B48-8997-8A96ACE07456}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UserManagment.TestAsyncHelper", "TestAsyncHelper\UserManagment.TestAsyncHelper.csproj", "{6A684C35-ED73-4879-82B4-17D659232C1A}"
 EndProject

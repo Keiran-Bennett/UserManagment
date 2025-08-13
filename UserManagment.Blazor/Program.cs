@@ -1,6 +1,6 @@
 using System.Net.Http.Headers;
-using UserManagment.Blazor.APIService;
-using UserManagment.Blazor.Components;
+using UserManagement.Blazor.APIService;
+using UserManagement.Blazor.Components;
 
 var builder = WebApplication.CreateBuilder(args);
 
