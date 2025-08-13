@@ -119,10 +119,9 @@ public class UserServiceTests
     public async Task GetUser_Success_ReturnsUser()
     {
         var getUser = CreateGetUser();
-
+        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
         Mock<IDataContext> dataContext = new();
         _userRepoMock.Setup(u => u.GetUsersWithLogs(It.Is<int>(x => x == 2), It.IsAny<CancellationToken>())).ReturnsAsync(getUser);
-
         var service = new UserService(dataContext.Object, _loggerService.Object, _userRepoMock.Object);
 
         // Act: Invokes the method under test with the arranged parameters.
@@ -132,7 +131,7 @@ public class UserServiceTests
         result.Should().BeEquivalentTo(getUser);
     }
 
-    private static User CreateGetUser() =>        // Arrange: Initializes objects and sets the value of the data that is passed to the method under test.
+    private static User CreateGetUser() =>        
             new User
             {
                 Id = 2,
@@ -227,12 +226,12 @@ public class UserServiceTests
         Mock<IDataContext> dataContext = new();
         dataContext
             .Setup(s => s.Update(It.IsAny<User>(), It.IsAny<CancellationToken>())).Throws(new Exception("Test catch"));
-
-        // Act: Invokes the method under test with the arranged parameters.
         var service = new UserService(dataContext.Object, _loggerService.Object, _userRepoMock.Object);
 
-        // Assert: Verifies that the action of the method under test behaves as expected.
+        // Act: Invokes the method under test with the arranged parameters.
         var result = await service.EditUser(new User { Id = 5, Forename = "bob", Surname = "Jones" }, _defaultCancellationToken);
+
+        // Assert: Verifies that the action of the method under test behaves as expected.
         result.Should().BeFalse();
     }
 
